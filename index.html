@@ -1,167 +1,248 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
 	<title>Karaoke Player</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<script src="assets/js/midiplayer/WebAudioFontPlayer.js" ></script>
-	<script src="assets/js/midiplayer/MIDIFile.js" ></script>
-	<script src="assets/js/midiplayer/MIDIPlayer.js" ></script>
-	<script src="assets/js/midifile/MIDIFileHeader.js" ></script>
-	<script src="assets/js/KarFile.js" ></script>
-	<link rel="stylesheet" href="themes/basic/theme.css" >
-	<link rel="stylesheet" href="themes/sunset/theme.css" >
-	<link rel="stylesheet" href="themes/christmas/theme.css" >
-	<link rel="stylesheet" href="assets/css/karaoke.css" >
-	<link rel="stylesheet" href="assets/css/range.css" >
-	
-	<link rel="shortcut icon" href="assets/images/icon.png" >
+	<script src="assets/js/midiplayer/WebAudioFontPlayer.js"></script>
+	<script src="assets/js/midiplayer/MIDIFile.js"></script>
+	<script src="assets/js/midiplayer/MIDIPlayer.js"></script>
+	<script src="assets/js/midifile/MIDIFileHeader.js"></script>
+	<script src="assets/js/KarFile.js"></script>
+	<link rel="stylesheet" href="themes/basic/theme.css">
+	<link rel="stylesheet" href="themes/sunset/theme.css">
+	<link rel="stylesheet" href="themes/christmas/theme.css">
+	<link rel="stylesheet" href="assets/css/karaoke.css">
+	<link rel="shortcut icon" href="assets/images/icon.png">
 </head>
-<body onload="" class="hidden" onunload="stop()">
-	<div class="toolbar">
-		<div class="app-title">
-			<img src="assets/images/icon.png" height="32" align="absmiddle"> Karaoke Player
+<body class="hidden" onunload="stop()">
+
+	<div id="screen-home" class="screen active">
+		<div class="home-header">
+			<div class="home-logo">
+				<img src="assets/images/icon.png" height="48" alt="Karaoke">
+			</div>
+			<div class="home-title-block">
+				<h1 class="home-title">Karaoke Player</h1>
+				<p class="home-subtitle" id="home-subtitle">Escolha uma musica e cante!</p>
+			</div>
 		</div>
-		<div class="playback-toolbar">
-			<input type=file id="inputfile"  accept=".mid,.midi,.kar" onchange=readKar(this) style="display:none" >
-			<button type="button" onclick="document.getElementById('inputfile').click()">Open File</button>
-			<button type="button" onclick="player.play()">Play</button>
-			<button type="button" onclick="player.pause()">Pause</button>
-			<button type="button" onclick="player.stop()">Stop</button>
-			<input id="position" type="range" min="0" max="100" value="0">	
+
+		<div class="home-menu" id="home-menu">
+			<div class="home-card focusable" data-action="open-songs" tabindex="0">
+				<div class="home-card-icon">&#9835;</div>
+				<div class="home-card-label">MUSICAS</div>
+				<div class="home-card-desc">Escolha da lista</div>
+			</div>
+			<div class="home-card focusable" data-action="open-upload" tabindex="0">
+				<div class="home-card-icon">&#8679;</div>
+				<div class="home-card-label">ABRIR ARQUIVO</div>
+				<div class="home-card-desc">Carregue um .kar/.mid</div>
+			</div>
+			<div class="home-card focusable" data-action="open-themes" tabindex="0">
+				<div class="home-card-icon">&#9790;</div>
+				<div class="home-card-label">TEMA</div>
+				<div class="home-card-desc">Mude o visual</div>
+			</div>
+		</div>
+
+		<div class="home-hint">
+			<span class="hint-key">&#9660; &#9650;</span> Navegar
+			<span class="hint-key">ENTER</span> Confirmar
+			<span class="hint-key">ESC</span> Voltar
 		</div>
 	</div>
-	
-	<div id=karaoke class="player karaoke">
-				<span class="previous">***</span><br>
-				<span class="inactive">Karaoke </span><span class="active">Player</span><br>
-				<span class="next">***</span>
+
+	<div id="screen-songs" class="screen">
+		<div class="list-header-bar">
+			<button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
+			<h2 class="list-title">Selecionar Musica</h2>
+		</div>
+		<div class="song-list-container">
+			<div id="songlist" class="song-list">
+				<div class="song-item loading">Carregando...</div>
+			</div>
+		</div>
+		<div class="home-hint">
+			<span class="hint-key">&#9660; &#9650;</span> Navegar
+			<span class="hint-key">ENTER</span> Tocar
+			<span class="hint-key">ESC / BACK</span> Voltar
+		</div>
 	</div>
-	<div id="themes" class="dialog hidden">
-		<div class="dialog-content">
-			<h3>Select Theme</h3>
-			<div class="option basic" onclick="document.location='#basic'">
-				<div class="karaoke">
-					<span class="previous">Basic</span>
-					<br>
-					<span class="active">Basic</span>
+
+	<div id="screen-themes" class="screen">
+		<div class="list-header-bar">
+			<button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
+			<h2 class="list-title">Escolher Tema</h2>
+		</div>
+		<div class="theme-grid">
+			<div class="theme-card basic focusable" data-theme="basic" tabindex="0">
+				<div class="theme-preview basic">
+					<span class="previous">Anterior</span><br>
+					<span class="active">Atual</span>
+					<span class="inactive"> proximo</span>
 				</div>
+				<div class="theme-name">Basic</div>
 			</div>
-			<div class="option sunset" onclick="document.location='#sunset'">
-				<div class="karaoke">
-					<span class="previous">Sunset</span>
-					<br>
-					<span class="active">Sunset</span>
+			<div class="theme-card sunset focusable" data-theme="sunset" tabindex="0">
+				<div class="theme-preview sunset">
+					<span class="previous">Anterior</span><br>
+					<span class="active">Atual</span>
+					<span class="inactive"> proximo</span>
 				</div>
+				<div class="theme-name">Sunset</div>
 			</div>
-			<div class="option christmas" onclick="document.location='#christmas'">
-				<div class="karaoke">
-					<span class="previous">Christmas</span>
-					<br>
-					<span class="active">Christmas</span>
+			<div class="theme-card christmas focusable" data-theme="christmas" tabindex="0">
+				<div class="theme-preview christmas">
+					<span class="previous">Anterior</span><br>
+					<span class="active">Atual</span>
+					<span class="inactive"> proximo</span>
 				</div>
+				<div class="theme-name">Christmas</div>
 			</div>
 		</div>
-		
+		<div class="home-hint">
+			<span class="hint-key">&#9660; &#9650; &#9664; &#9654;</span> Navegar
+			<span class="hint-key">ENTER</span> Selecionar
+			<span class="hint-key">ESC</span> Voltar
+		</div>
 	</div>
-	<div id="songs" class="dialog hidden">
-		<div class="dialog-content" style="float: right;">
-			<h3 class="list-header">Select Song</h3>
-			<div id="songlist">
-				<div class="Song" >Loading...</div>
+
+	<div id="screen-player" class="screen">
+		<div id="player-hud" class="player-hud">
+			<div class="player-hud-left">
+				<span id="hud-song-name" class="hud-song-name">...</span>
+			</div>
+			<div class="player-hud-center">
+				<div class="player-progress-bar">
+					<div id="progress-fill" class="progress-fill"></div>
+				</div>
+				<span id="hud-time" class="hud-time">0:00</span>
+			</div>
+			<div class="player-hud-right">
+				<span id="hud-state" class="hud-state">&#9654;</span>
 			</div>
 		</div>
-		
+
+		<div id="karaoke" class="karaoke-display">
+			<span class="previous">***</span><br>
+			<span class="inactive">Karaoke </span><span class="active">Player</span><br>
+			<span class="next">***</span>
+		</div>
+
+		<div id="player-controls-bar" class="player-controls-bar hidden-controls">
+			<button class="ctrl-btn focusable" data-action="back-home" tabindex="0">&#8962; Menu</button>
+			<button class="ctrl-btn focusable" data-action="prev-song" tabindex="0">&#8826; Anterior</button>
+			<button class="ctrl-btn focusable" id="btn-play-pause" data-action="play-pause" tabindex="0">&#9646;&#9646; Pausar</button>
+			<button class="ctrl-btn focusable" data-action="next-song" tabindex="0">Proxima &#8827;</button>
+			<button class="ctrl-btn focusable" data-action="stop" tabindex="0">&#9632; Parar</button>
+		</div>
 	</div>
-	<div id="footer" class="footer">
-		<button id="themebutton" type="button" onclick="openDialog('themes')">Theme</button>
-		<div id="footer-text" class="footer-text">Karaoke Player by Francisco Igor</div>
-		<button id="songbutton" type="button" onclick="openDialog('songs')">Song</button>
-	</div>
-	<pre id=result style="display:none"></pre>
+
+	<input type="file" id="inputfile" accept=".mid,.midi,.kar" onchange="readKar(this)" style="display:none">
+
 	<script src="assets/js/player.js"></script>
 	<script src="config.js"></script>
+	<script src="assets/js/ui.js"></script>
 	<script>
-	window.onload=function(){
-		var pos= document.getElementById("position");
-		pos.onchange=function(ev){
-			console.log(pos.value);
-			player.setPosition(pos.value*1);
-		}
-		window.onhashchange();
+	window.onload = function() {
+		var hash = document.location.hash;
+		var themes = ["#sunset", "#basic", "#christmas", "#none"];
+		var theme = themes.indexOf(hash) >= 0 ? hash.substring(1) : (window.defaultTheme || "sunset");
+		document.body.className = theme;
+
 		player = new MIDIPlayer('inputfile');
-		// creating the MidiFile instance from a buffer (view MIDIFile README)
-		player.onload=function(song){
+		player.onload = function(song) {
 			player.play();
-			pos.setAttribute("max",song.duration)
+			updatePlayerHUD(song);
+		};
+		player.ontick = function(song, position) {
+			updateProgress(song, position);
+		};
+
+		if (document.location.search.length > 1) {
+			playlistPath = document.location.search.substring(1);
 		}
-		player.ontick=function(song, position){
-			pos.value=position;
+		loadPlaylist(window.playlistPath);
+		initUI();
+	};
+
+	window.onblur = function() {
+		if (typeof player !== 'undefined' && player) {
+			player.pause();
+		}
+	};
+	window.onfocus = function() {
+		if (typeof player !== 'undefined' && player) {
+			player.play();
+		}
+	};
+
+	function updatePlayerHUD(song) {
+		var nameEl = document.getElementById('hud-song-name');
+		if (nameEl && window.currentSongName) {
+			nameEl.textContent = window.currentSongName;
 		}
 	}
-	window.onblur=function(){
-		console.log("Blur", new Date())
-		player.pause();
-	}
-	window.onfocus=function(){
-		console.log("Focus", new Date())
-		player.play();
-	}
-	window.onhashchange=function(){
-		var hash=document.location.hash;
-		var themes=[
-			"#sunset",
-			"#basic",
-			"#christmas",
-			"#none",
-		]
-		if (themes.indexOf(hash)>=0){
-			document.body.className=hash.substring(1);
-		}else{
-			document.body.className=window.defaultTheme?defaultTheme:themes[0];
+
+	function updateProgress(song, position) {
+		if (!song) return;
+		var fill = document.getElementById('progress-fill');
+		var timeEl = document.getElementById('hud-time');
+		if (fill && song.duration > 0) {
+			fill.style.width = ((position / song.duration) * 100) + '%';
 		}
-		document.getElementById("themes").className="dialog hidden";
-	}
-	function openDialog(id){
-		var dialog=document.getElementById(id);
-		console.log(dialog.className);
-		if (dialog.className=="dialog hidden"){
-			var dialogs=document.getElementsByClassName("dialog visible");
-			if (dialogs.length) dialogs[0].className="dialog hidden";
-			dialog.className="dialog visible";
-		}else{
-			dialog.className="dialog hidden";
+		if (timeEl) {
+			var mins = Math.floor(position / 60);
+			var secs = Math.floor(position % 60);
+			timeEl.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
 		}
-		
 	}
-	function loadSong(obj){
-		playUrl(obj.playlistPath,obj.filename);
-		document.getElementById("songs").className="dialog hidden";
+
+	function loadSong(playlistPathArg, filename) {
+		window.currentSongName = filename;
+		if (window.playlistData) {
+			window.currentSongIndex = window.playlistData.indexOf(filename);
+		}
+		playUrl(playlistPathArg, filename);
+		showScreen('screen-player');
+		if (typeof showPlayerControls === 'function') showPlayerControls();
 	}
-	function loadPlaylist(playlistPath){
-		fetch(playlistPath+'playlist.json')
-			.then(function(response) {
-				return response.json();
-			})
+
+	function loadPlaylist(pPath) {
+		fetch(pPath + 'playlist.json')
+			.then(function(response) { return response.json(); })
 			.then(function(data) {
-				console.log(data);
-				var list=document.getElementById("songlist");
-				list.innerHTML="";
-				for(var i=0; i<data.length; i++){
-					var div=document.createElement("div");
-					div.innerHTML=data[i];
-					div.className="song";
-					div.playlistPath=playlistPath;
-					div.filename=data[i];
-					div.setAttribute("onclick","loadSong(this)")
+				var count = data.length;
+				document.getElementById('home-subtitle').textContent = count + ' musica' + (count !== 1 ? 's' : '') + ' no catalogo';
+				window.playlistData = data;
+				window.playlistPathLoaded = pPath;
+				var list = document.getElementById('songlist');
+				list.innerHTML = '';
+				for (var i = 0; i < data.length; i++) {
+					var div = document.createElement('div');
+					div.className = 'song-item focusable';
+					div.tabIndex = 0;
+					div.setAttribute('data-index', i);
+					div.setAttribute('data-filename', data[i]);
+					div.setAttribute('data-playlist-path', pPath);
+					var num = document.createElement('span');
+					num.className = 'song-number';
+					num.textContent = (i + 1) + '.';
+					var name = document.createElement('span');
+					name.className = 'song-name';
+					name.textContent = data[i];
+					div.appendChild(num);
+					div.appendChild(name);
+					div.addEventListener('click', function() {
+						loadSong(this.getAttribute('data-playlist-path'), this.getAttribute('data-filename'));
+					});
 					list.appendChild(div);
 				}
+			})
+			.catch(function() {
+				document.getElementById('home-subtitle').textContent = 'Nenhuma musica no catalogo';
 			});
 	}
-	if (document.location.search.length>1){
-		playlistPath=document.location.search.substring(1);
-	}
-	loadPlaylist(window.playlistPath);
-	
 	</script>
 </body>
 </html>
