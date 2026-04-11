@@ -333,8 +333,7 @@
                                 .then(function(r) { return r.json(); })
                                 .then(function(data) {
                                         if (data.success) {
-                                                var msg = data.added.length + ' música(s) adicionada(s) ao catálogo.';
-                                                if (data.skipped.length > 0) msg += ' ' + data.skipped.length + ' já existia(m).';
+                                                var msg = data.saved.length + ' arquivo(s) enviado(s). Catálogo sincronizado: ' + data.total + ' música(s) no total.';
                                                 status.className = 'upload-status success';
                                                 status.textContent = msg;
                                                 selectedFiles = [];
