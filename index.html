@@ -1,731 +1,736 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-	<title>Karaoke Player</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<script src="assets/js/midiplayer/WebAudioFontPlayer.js"></script>
-	<script src="assets/js/midiplayer/MIDIFile.js"></script>
-	<script src="assets/js/midiplayer/MIDIPlayer.js"></script>
-	<script src="assets/js/midifile/MIDIFileHeader.js"></script>
-	<script src="assets/js/KarFile.js"></script>
-	<link rel="stylesheet" href="themes/basic/theme.css">
-	<link rel="stylesheet" href="themes/sunset/theme.css">
-	<link rel="stylesheet" href="themes/christmas/theme.css">
-	<link rel="stylesheet" href="assets/css/karaoke.css">
-	<link rel="shortcut icon" href="assets/images/icon.png">
+        <title>Karaoke Player</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="assets/js/midiplayer/WebAudioFontPlayer.js"></script>
+        <script src="assets/js/midiplayer/MIDIFile.js"></script>
+        <script src="assets/js/midiplayer/MIDIPlayer.js"></script>
+        <script src="assets/js/midifile/MIDIFileHeader.js"></script>
+        <script src="assets/js/KarFile.js"></script>
+        <link rel="stylesheet" href="themes/basic/theme.css">
+        <link rel="stylesheet" href="themes/sunset/theme.css">
+        <link rel="stylesheet" href="themes/christmas/theme.css">
+        <link rel="stylesheet" href="assets/css/karaoke.css">
+        <link rel="shortcut icon" href="assets/images/icon.png">
 </head>
 <body class="hidden" onunload="stop()">
 
-	<!-- HOME -->
-	<div id="screen-home" class="screen active">
-		<div class="home-header">
-			<div class="home-logo">
-				<img src="assets/images/icon.png" height="48" alt="Karaoke">
-			</div>
-			<div class="home-title-block">
-				<h1 class="home-title">Karaoke Player</h1>
-				<p class="home-subtitle" id="home-subtitle">Carregando catálogo...</p>
-			</div>
-		</div>
-		<div class="home-menu" id="home-menu">
-			<div class="home-card focusable" data-action="open-songs" tabindex="0">
-				<div class="home-card-icon">&#9835;</div>
-				<div class="home-card-label">MUSICAS</div>
-				<div class="home-card-desc">Escolha da lista</div>
-			</div>
-			<div class="home-card focusable" data-action="open-upload-screen" tabindex="0">
-				<div class="home-card-icon">&#8679;</div>
-				<div class="home-card-label">ADICIONAR</div>
-				<div class="home-card-desc">Envie .kar/.mid ao catálogo</div>
-			</div>
-			<div class="home-card focusable" data-action="open-themes" tabindex="0">
-				<div class="home-card-icon">&#9790;</div>
-				<div class="home-card-label">TEMA</div>
-				<div class="home-card-desc">Mude o visual</div>
-			</div>
-		</div>
-		<div class="home-hint">
-			<span class="hint-key">&#9660; &#9650;</span> Navegar
-			<span class="hint-key">ENTER</span> Confirmar
-			<span class="hint-key">ESC</span> Voltar
-		</div>
-	</div>
-
-	<!-- SONGS LIST -->
-	<div id="screen-songs" class="screen">
-		<div class="list-header-bar">
-			<button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
-			<h2 class="list-title">Selecionar Musica</h2>
-		</div>
-		<div class="category-switcher">
-			<button class="cat-arrow focusable" data-action="cat-prev" tabindex="0">&#9664;</button>
-			<span class="cat-label" id="cat-label">INTERNACIONAL</span>
-			<button class="cat-arrow focusable" data-action="cat-next" tabindex="0">&#9654;</button>
-		</div>
-		<div class="search-bar-wrap">
-			<input type="text" id="song-search" class="song-search-input" placeholder="&#128269; Pesquisar música..." autocomplete="off" />
-		</div>
-		<div class="song-list-container">
-			<div id="songlist" class="song-list">
-				<div class="song-item loading">Carregando...</div>
-			</div>
-		</div>
-		<div class="home-hint">
-			<span class="hint-key">&#9660; &#9650;</span> Navegar
-			<span class="hint-key">ENTER</span> Tocar
-			<span class="hint-key">&#9664; &#9654;</span> Categoria
-			<span class="hint-key">ESC / BACK</span> Voltar
-		</div>
-	</div>
-
-	<!-- UPLOAD -->
-	<div id="screen-upload" class="screen">
-		<div class="list-header-bar">
-			<button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
-			<h2 class="list-title">Adicionar Músicas</h2>
-		</div>
-		<div class="upload-body">
-			<div class="upload-category-row">
-				<span class="upload-label">Categoria:</span>
-				<label class="upload-radio-label">
-					<input type="radio" name="upload-category" value="internacional" checked> Internacional
-				</label>
-				<label class="upload-radio-label">
-					<input type="radio" name="upload-category" value="nacional"> Nacional
-				</label>
-			</div>
-			<div class="upload-drop-zone" id="upload-drop-zone">
-				<div class="upload-drop-icon">&#8679;</div>
-				<div class="upload-drop-text">Arraste arquivos aqui ou clique para selecionar</div>
-				<div class="upload-drop-sub">.kar e .mid suportados — múltiplos arquivos permitidos</div>
-				<input type="file" id="upload-file-input" accept=".mid,.midi,.kar" multiple style="display:none">
-			</div>
-			<div id="upload-file-list" class="upload-file-list"></div>
-			<div id="upload-status" class="upload-status"></div>
-			<div class="upload-actions">
-				<button class="upload-btn focusable" id="btn-upload" tabindex="0" disabled>&#8679; Adicionar ao Catálogo</button>
-			</div>
-		</div>
-	</div>
-
-	<!-- THEMES -->
-	<div id="screen-themes" class="screen">
-		<div class="list-header-bar">
-			<button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
-			<h2 class="list-title">Escolher Tema</h2>
-		</div>
-		<div class="theme-grid">
-			<div class="theme-card basic focusable" data-theme="basic" tabindex="0">
-				<div class="theme-preview basic">
-					<span class="previous">Anterior</span><br>
-					<span class="active">Atual</span>
-					<span class="inactive"> proximo</span>
-				</div>
-				<div class="theme-name">Basic</div>
-			</div>
-			<div class="theme-card sunset focusable" data-theme="sunset" tabindex="0">
-				<div class="theme-preview sunset">
-					<span class="previous">Anterior</span><br>
-					<span class="active">Atual</span>
-					<span class="inactive"> proximo</span>
-				</div>
-				<div class="theme-name">Sunset</div>
-			</div>
-			<div class="theme-card christmas focusable" data-theme="christmas" tabindex="0">
-				<div class="theme-preview christmas">
-					<span class="previous">Anterior</span><br>
-					<span class="active">Atual</span>
-					<span class="inactive"> proximo</span>
-				</div>
-				<div class="theme-name">Christmas</div>
-			</div>
-		</div>
-		<div class="home-hint">
-			<span class="hint-key">&#9660; &#9650; &#9664; &#9654;</span> Navegar
-			<span class="hint-key">ENTER</span> Selecionar
-			<span class="hint-key">ESC</span> Voltar
-		</div>
-	</div>
-
-	<!-- PLAYER -->
-	<div id="screen-player" class="screen">
-		<div id="player-hud" class="player-hud">
-			<div class="player-hud-left">
-				<span id="hud-song-name" class="hud-song-name">...</span>
-			</div>
-			<div class="player-hud-center">
-				<div class="player-progress-bar">
-					<div id="progress-fill" class="progress-fill"></div>
-				</div>
-				<span id="hud-time" class="hud-time">0:00</span>
-			</div>
-			<div class="player-hud-right">
-				<span id="hud-state" class="hud-state">&#9654;</span>
-			</div>
-		</div>
-
-		<!-- Queue HUD -->
-		<div id="queue-hud" class="queue-hud">
-			<div class="queue-hud-title">&#9783; FILA</div>
-			<div id="queue-hud-list" class="queue-hud-list"></div>
-		</div>
-
-		<div id="karaoke" class="karaoke-display">
-			<span class="previous">***</span><br>
-			<span class="inactive">Karaoke </span><span class="active">Player</span><br>
-			<span class="next">***</span>
-		</div>
-
-		<!-- Number input panel -->
-		<div id="queue-number-panel" class="queue-number-panel">
-			<div class="queue-number-hint">Adicionar à fila</div>
-			<div class="queue-number-display">
-				<span class="queue-number-hash">#</span>
-				<span id="queue-number-digits" class="queue-number-digits">_</span>
-			</div>
-			<div class="queue-number-sub">ENTER para confirmar &bull; ESC para cancelar</div>
-		</div>
-
-		<!-- Countdown overlay -->
-		<div id="queue-countdown-overlay" class="queue-countdown-overlay">
-			<div class="countdown-label">Próxima Música</div>
-			<div id="countdown-song-title" class="countdown-song-title"></div>
-			<div id="countdown-timer" class="countdown-timer">10</div>
-			<div class="countdown-sub">Iniciando em breve...</div>
-		</div>
-
-		<div id="player-controls-bar" class="player-controls-bar hidden-controls">
-			<button class="ctrl-btn focusable" data-action="back-home" tabindex="0">&#8962; Menu</button>
-			<button class="ctrl-btn focusable" data-action="prev-song" tabindex="0">&#8826; Anterior</button>
-			<button class="ctrl-btn focusable" id="btn-play-pause" data-action="play-pause" tabindex="0">&#9646;&#9646; Pausar</button>
-			<button class="ctrl-btn focusable" data-action="next-song" tabindex="0">Proxima &#8827;</button>
-			<button class="ctrl-btn focusable" data-action="stop" tabindex="0">&#9632; Parar</button>
-		</div>
-	</div>
-
-	<input type="file" id="inputfile" accept=".mid,.midi,.kar" style="display:none">
-
-	<script src="assets/js/player.js"></script>
-	<script src="config.js"></script>
-	<script src="assets/js/ui.js"></script>
-	<script>
-	/* ── Playlist paths (single source of truth) ── */
-	var NACIONAL_PATH     = 'musicas/';
-	var INTERNACIONAL_PATH = 'assets/music/';
-
-	/* Nacional songs are numbered 1..N
-	   Internacional songs are numbered N+1..N+M
-	   These globals hold the full arrays so any function can resolve numbers. */
-	var nacionalPlaylist      = [];   /* 1-based slot 1..N */
-	var internacionalPlaylist = [];   /* 1-based slot N+1..N+M */
-
-	/* ── Categories (for switcher UI) ── */
-	var categories = [
-		{label: 'INTERNACIONAL', path: INTERNACIONAL_PATH},
-		{label: 'NACIONAL',      path: NACIONAL_PATH}
-	];
-	var currentCategoryIndex = 0;
-
-	/* ── Queue state ── */
-	var songQueue             = [];
-	var queueCountdownActive  = false;
-	var queueCountdownInterval = null;
-
-	/* ── Number-input state ── */
-	var queueDigits    = '';
-	var queueDigitTimer = null;
-	var DIGIT_TIMEOUT  = 3000; /* ms of inactivity before panel auto-closes */
-
-	/* ── Song-end detection ── */
-	var songEndArmed       = false;
-	var prevOntickPosition = -1;
-
-	/* ════════════════════════════════════════
-	   STARTUP
-	   ════════════════════════════════════════ */
-	window.onload = function() {
-		var hash = document.location.hash;
-		var themes = ['#sunset', '#basic', '#christmas', '#none'];
-		var theme = themes.indexOf(hash) >= 0 ? hash.substring(1) : (window.defaultTheme || 'sunset');
-		document.body.className = theme;
-
-		player = new MIDIPlayer('inputfile');
-		player.onload = function(song) {
-			player.play();
-			updatePlayerHUD(song);
-		};
-		player.ontick = function(song, position) {
-			updateProgress(song, position);
-			detectSongEnd(song, position);
-		};
-
-		if (document.location.search.length > 1) {
-			playlistPath = document.location.search.substring(1);
-		}
-
-		initUI();
-		initUploadScreen();
-
-		document.getElementById('song-search').addEventListener('input', function() {
-			filterSongs(this.value);
-		});
-
-		/* Load both playlists before rendering the first category */
-		loadBothPlaylists(function() {
-			updateHomeSubtitle();
-			updateCategoryLabel();
-			renderCurrentCategory();
-		});
-	};
-
-	/* ════════════════════════════════════════
-	   DUAL-PLAYLIST LOADING
-	   ════════════════════════════════════════ */
-
-	/* Fetch both playlists from disk, populate the global arrays, then call cb(). */
-	function loadBothPlaylists(cb) {
-		var pending = 2;
-		function done() { if (--pending === 0 && cb) cb(); }
-
-		fetch(NACIONAL_PATH + 'playlist.json')
-			.then(function(r) { return r.json(); })
-			.then(function(d) { nacionalPlaylist = d || []; done(); })
-			.catch(function()  { nacionalPlaylist = []; done(); });
-
-		fetch(INTERNACIONAL_PATH + 'playlist.json')
-			.then(function(r) { return r.json(); })
-			.then(function(d) { internacionalPlaylist = d || []; done(); })
-			.catch(function()  { internacionalPlaylist = []; done(); });
-	}
-
-	/* Refresh both playlists then re-render the currently visible category. */
-	function refreshAllAndRender() {
-		loadBothPlaylists(function() {
-			updateHomeSubtitle();
-			renderCurrentCategory();
-		});
-	}
-
-	function updateHomeSubtitle() {
-		var total = nacionalPlaylist.length + internacionalPlaylist.length;
-		var el = document.getElementById('home-subtitle');
-		if (el) el.textContent = total + ' musica' + (total !== 1 ? 's' : '') + ' no catalogo';
-	}
-
-	/* ════════════════════════════════════════
-	   SONG LIST RENDERING  (with global numbers)
-	   ════════════════════════════════════════ */
-
-	function renderCurrentCategory() {
-		var path = categories[currentCategoryIndex].path;
-		if (path === NACIONAL_PATH) {
-			window.playlistData       = nacionalPlaylist;
-			window.playlistPathLoaded = NACIONAL_PATH;
-			renderSongList(nacionalPlaylist, NACIONAL_PATH, 0 /* offset: Nacional starts at 1 */);
-		} else {
-			window.playlistData       = internacionalPlaylist;
-			window.playlistPathLoaded = INTERNACIONAL_PATH;
-			renderSongList(internacionalPlaylist, INTERNACIONAL_PATH, nacionalPlaylist.length /* offset */);
-		}
-	}
-
-	function renderSongList(data, pPath, offset) {
-		var list = document.getElementById('songlist');
-		list.innerHTML = '';
-		if (data.length === 0) {
-			var empty = document.createElement('div');
-			empty.className = 'song-item loading';
-			empty.textContent = 'Nenhuma música nesta categoria';
-			list.appendChild(empty);
-			return;
-		}
-		for (var i = 0; i < data.length; i++) {
-			(function(idx, name, path, globalNum) {
-				var div = document.createElement('div');
-				div.className = 'song-item focusable';
-				div.tabIndex = 0;
-				div.setAttribute('data-index', idx);
-				div.setAttribute('data-filename', name);
-				div.setAttribute('data-playlist-path', path);
-				div.setAttribute('data-global-num', globalNum);
-				var num = document.createElement('span');
-				num.className = 'song-number';
-				num.textContent = globalNum + '.';
-				var nameEl = document.createElement('span');
-				nameEl.className = 'song-name';
-				nameEl.textContent = name;
-				div.appendChild(num);
-				div.appendChild(nameEl);
-				div.addEventListener('click', function() { loadSong(path, name); });
-				list.appendChild(div);
-			})(i, data[i], pPath, offset + i + 1);
-		}
-	}
-
-	/* ════════════════════════════════════════
-	   CATEGORY SWITCHER
-	   ════════════════════════════════════════ */
-
-	function updateCategoryLabel() {
-		var el = document.getElementById('cat-label');
-		if (el) el.textContent = categories[currentCategoryIndex].label;
-	}
-
-	function switchCategory(dir) {
-		currentCategoryIndex = (currentCategoryIndex + dir + categories.length) % categories.length;
-		updateCategoryLabel();
-		var searchEl = document.getElementById('song-search');
-		if (searchEl) searchEl.value = '';
-		renderCurrentCategory();
-	}
-
-	/* ════════════════════════════════════════
-	   SEARCH FILTER
-	   ════════════════════════════════════════ */
-
-	function filterSongs(query) {
-		var q = query.trim().toLowerCase();
-		var items = document.querySelectorAll('#songlist .song-item:not(.loading)');
-		var visible = 0;
-		for (var i = 0; i < items.length; i++) {
-			var name = (items[i].getAttribute('data-filename') || '').toLowerCase();
-			var show = !q || name.indexOf(q) >= 0;
-			items[i].style.display = show ? '' : 'none';
-			if (show) visible++;
-		}
-		var noResult = document.getElementById('no-results');
-		if (q && visible === 0) {
-			if (!noResult) {
-				noResult = document.createElement('div');
-				noResult.id = 'no-results';
-				noResult.className = 'song-item loading';
-				noResult.textContent = 'Nenhuma música encontrada';
-				document.getElementById('songlist').appendChild(noResult);
-			}
-			noResult.style.display = '';
-		} else if (noResult) {
-			noResult.style.display = 'none';
-		}
-	}
-
-	/* ════════════════════════════════════════
-	   SONG-END DETECTION
-	   ════════════════════════════════════════ */
-
-	function detectSongEnd(song, position) {
-		if (!song || !song.duration || song.duration < 2) return;
-		if (!songEndArmed && position > Math.min(5, song.duration * 0.3)) {
-			songEndArmed = true;
-		}
-		if (songEndArmed && prevOntickPosition > song.duration * 0.85 && position < song.duration * 0.1) {
-			songEndArmed = false;
-			prevOntickPosition = -1;
-			onSongEnd();
-			return;
-		}
-		prevOntickPosition = position;
-	}
-
-	function onSongEnd() {
-		if (queueCountdownActive) return;
-		if (songQueue.length > 0) startQueueCountdown();
-	}
-
-	/* ════════════════════════════════════════
-	   QUEUE MANAGEMENT
-	   ════════════════════════════════════════ */
-
-	/* Resolve a 1-based global number to {path, filename}.
-	   Nacional occupies slots 1..N, Internacional N+1..N+M. */
-	function resolveGlobalNumber(globalNum) {
-		var natCount = nacionalPlaylist.length;
-		var intCount = internacionalPlaylist.length;
-		if (globalNum < 1) return null;
-		if (globalNum <= natCount) {
-			return {path: NACIONAL_PATH, filename: nacionalPlaylist[globalNum - 1]};
-		}
-		if (globalNum <= natCount + intCount) {
-			return {path: INTERNACIONAL_PATH, filename: internacionalPlaylist[globalNum - natCount - 1]};
-		}
-		return null;
-	}
-
-	function addToQueue(globalNum) {
-		var resolved = resolveGlobalNumber(globalNum);
-		if (!resolved) return false;
-		songQueue.push({path: resolved.path, filename: resolved.filename, number: globalNum});
-		updateQueueHUD();
-		return true;
-	}
-
-	function updateQueueHUD() {
-		var hud = document.getElementById('queue-hud');
-		var list = document.getElementById('queue-hud-list');
-		if (!hud || !list) return;
-		if (songQueue.length === 0) { hud.classList.remove('visible'); return; }
-		hud.classList.add('visible');
-		list.innerHTML = '';
-		for (var i = 0; i < Math.min(songQueue.length, 6); i++) {
-			var item = document.createElement('div');
-			item.className = 'queue-hud-item';
-			item.textContent = '#' + songQueue[i].number + ' ' + songQueue[i].filename;
-			list.appendChild(item);
-		}
-		if (songQueue.length > 6) {
-			var more = document.createElement('div');
-			more.className = 'queue-hud-item queue-hud-more';
-			more.textContent = '+ ' + (songQueue.length - 6) + ' mais...';
-			list.appendChild(more);
-		}
-	}
-
-	function startQueueCountdown() {
-		if (songQueue.length === 0) return;
-		queueCountdownActive = true;
-		if (typeof player !== 'undefined' && player) player.stop();
-
-		var next = songQueue[0];
-		var overlay = document.getElementById('queue-countdown-overlay');
-		var titleEl = document.getElementById('countdown-song-title');
-		var timerEl = document.getElementById('countdown-timer');
-
-		titleEl.textContent = next.filename;
-		timerEl.textContent = '10';
-		overlay.classList.add('visible');
-
-		var count = 10;
-		queueCountdownInterval = setInterval(function() {
-			count--;
-			timerEl.textContent = count;
-			if (count <= 0) {
-				clearInterval(queueCountdownInterval);
-				queueCountdownInterval = null;
-				overlay.classList.remove('visible');
-				queueCountdownActive = false;
-				var song = songQueue.shift();
-				updateQueueHUD();
-				loadSong(song.path, song.filename);
-			}
-		}, 1000);
-	}
-
-	function cancelCountdown() {
-		if (!queueCountdownActive) return;
-		clearInterval(queueCountdownInterval);
-		queueCountdownInterval = null;
-		queueCountdownActive = false;
-		var overlay = document.getElementById('queue-countdown-overlay');
-		if (overlay) overlay.classList.remove('visible');
-		songQueue.shift();
-		updateQueueHUD();
-	}
-
-	/* ════════════════════════════════════════
-	   NUMBER INPUT FOR QUEUE
-	   ════════════════════════════════════════ */
-
-	function handleQueueNumberKey(digit) {
-		if (queueDigits.length >= 5) return; /* max 5 digits (up to 99999 songs) */
-		queueDigits += digit;
-		renderQueueNumberPanel();
-		resetQueueDigitTimer();
-	}
-
-	function commitQueueNumber() {
-		if (queueDigits === '') return;
-		var num = parseInt(queueDigits, 10);
-		clearQueueNumberPanel();
-		if (addToQueue(num)) {
-			flashQueueConfirm('\u2714 #' + num + ' adicionado');
-		} else {
-			flashQueueConfirm('\u2718 N\u00famero inv\u00e1lido');
-		}
-	}
-
-	function backspaceQueueNumber() {
-		if (queueDigits.length === 0) return;
-		queueDigits = queueDigits.slice(0, -1);
-		if (queueDigits === '') { hideQueueNumberPanel(); }
-		else { renderQueueNumberPanel(); resetQueueDigitTimer(); }
-	}
-
-	function clearQueueNumberPanel() {
-		queueDigits = '';
-		if (queueDigitTimer) { clearTimeout(queueDigitTimer); queueDigitTimer = null; }
-		hideQueueNumberPanel();
-	}
-
-	function hideQueueNumberPanel() {
-		var panel = document.getElementById('queue-number-panel');
-		if (panel) panel.classList.remove('visible');
-	}
-
-	function renderQueueNumberPanel() {
-		var panel = document.getElementById('queue-number-panel');
-		var digEl = document.getElementById('queue-number-digits');
-		if (!panel || !digEl) return;
-		digEl.textContent = queueDigits || '_';
-		panel.classList.add('visible');
-	}
-
-	function resetQueueDigitTimer() {
-		if (queueDigitTimer) clearTimeout(queueDigitTimer);
-		queueDigitTimer = setTimeout(function() {
-			clearQueueNumberPanel();
-		}, DIGIT_TIMEOUT);
-	}
-
-	function flashQueueConfirm(msg) {
-		var panel = document.getElementById('queue-number-panel');
-		var digEl = document.getElementById('queue-number-digits');
-		if (!panel || !digEl) return;
-		panel.classList.add('visible', 'flash');
-		digEl.textContent = msg;
-		setTimeout(function() {
-			panel.classList.remove('visible', 'flash');
-		}, 1800);
-	}
-
-	/* ════════════════════════════════════════
-	   PLAYER HELPERS
-	   ════════════════════════════════════════ */
-
-	window.onblur = function() {
-		if (typeof player !== 'undefined' && player) player.pause();
-	};
-	window.onfocus = function() {
-		if (typeof player !== 'undefined' && player) player.play();
-	};
-
-	function updatePlayerHUD(song) {
-		var nameEl = document.getElementById('hud-song-name');
-		if (nameEl && window.currentSongName) nameEl.textContent = window.currentSongName;
-	}
-
-	function updateProgress(song, position) {
-		if (!song) return;
-		var fill = document.getElementById('progress-fill');
-		var timeEl = document.getElementById('hud-time');
-		if (fill && song.duration > 0) fill.style.width = ((position / song.duration) * 100) + '%';
-		if (timeEl) {
-			var mins = Math.floor(position / 60);
-			var secs = Math.floor(position % 60);
-			timeEl.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
-		}
-	}
-
-	function loadSong(pPath, filename) {
-		window.currentSongName = filename;
-		/* Track song index within the currently displayed playlist for prev/next */
-		if (pPath === NACIONAL_PATH) {
-			window.playlistData       = nacionalPlaylist;
-			window.playlistPathLoaded = NACIONAL_PATH;
-			window.currentSongIndex   = nacionalPlaylist.indexOf(filename);
-		} else {
-			window.playlistData       = internacionalPlaylist;
-			window.playlistPathLoaded = INTERNACIONAL_PATH;
-			window.currentSongIndex   = internacionalPlaylist.indexOf(filename);
-		}
-		songEndArmed       = false;
-		prevOntickPosition = -1;
-		playUrl(pPath, filename);
-		showScreen('screen-player');
-		if (typeof showPlayerControls === 'function') showPlayerControls();
-	}
-
-	/* ════════════════════════════════════════
-	   UPLOAD SCREEN
-	   ════════════════════════════════════════ */
-
-	function initUploadScreen() {
-		var dropZone  = document.getElementById('upload-drop-zone');
-		var fileInput = document.getElementById('upload-file-input');
-		var btnUpload = document.getElementById('btn-upload');
-		var selectedFiles = [];
-
-		dropZone.addEventListener('click', function() { fileInput.click(); });
-		dropZone.addEventListener('dragover', function(e) {
-			e.preventDefault(); dropZone.classList.add('dragover');
-		});
-		dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('dragover'); });
-		dropZone.addEventListener('drop', function(e) {
-			e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files);
-		});
-		fileInput.addEventListener('change', function() { handleFiles(this.files); });
-
-		function handleFiles(files) {
-			selectedFiles = [];
-			for (var i = 0; i < files.length; i++) {
-				var ext = files[i].name.split('.').pop().toLowerCase();
-				if (ext === 'kar' || ext === 'mid' || ext === 'midi') selectedFiles.push(files[i]);
-			}
-			renderFileList();
-		}
-
-		function renderFileList() {
-			var list = document.getElementById('upload-file-list');
-			var status = document.getElementById('upload-status');
-			status.textContent = '';
-			status.className = 'upload-status';
-			list.innerHTML = '';
-			btnUpload.disabled = selectedFiles.length === 0;
-			for (var i = 0; i < selectedFiles.length; i++) {
-				var item = document.createElement('div');
-				item.className = 'upload-file-item';
-				item.innerHTML = '<span class="upload-file-icon">&#9835;</span><span class="upload-file-name">' + selectedFiles[i].name + '</span>';
-				list.appendChild(item);
-			}
-		}
-
-		btnUpload.addEventListener('click', function() {
-			if (selectedFiles.length === 0) return;
-			var catEl = document.querySelector('input[name="upload-category"]:checked');
-			var category = catEl ? catEl.value : 'internacional';
-			var formData = new FormData();
-			formData.append('category', category);
-			for (var i = 0; i < selectedFiles.length; i++) formData.append('files', selectedFiles[i]);
-
-			var status = document.getElementById('upload-status');
-			btnUpload.disabled = true;
-			status.className = 'upload-status loading';
-			status.textContent = 'Enviando...';
-
-			fetch('/upload', {method: 'POST', body: formData})
-				.then(function(r) { return r.json(); })
-				.then(function(data) {
-					if (data.success) {
-						var lines = [];
-						if (data.saved.length > 0) lines.push('\u2714 ' + data.saved.length + ' m\u00fasica(s) adicionada(s) ao cat\u00e1logo.');
-						if (data.dup_name && data.dup_name.length > 0) lines.push('\u26a0 Mesmo nome j\u00e1 existe: ' + data.dup_name.join(', '));
-						if (data.dup_content && data.dup_content.length > 0) {
-							lines.push('\u26a0 Conte\u00fado duplicado: ' + data.dup_content.map(function(d) {
-								return '"' + d.file + '" (igual a "' + d.matches + '")';
-							}).join('; '));
-						}
-						if (!data.saved.length && !(data.dup_name && data.dup_name.length) && !(data.dup_content && data.dup_content.length)) {
-							lines.push('Nenhum arquivo novo foi adicionado.');
-						}
-						lines.push('Total no cat\u00e1logo: ' + data.total + ' m\u00fasica(s).');
-						status.className = data.saved.length > 0 ? 'upload-status success' : 'upload-status error';
-						status.innerHTML = lines.join('<br>');
-						selectedFiles = [];
-						fileInput.value = '';
-						renderFileList();
-						/* Reload both playlists so global numbering stays fresh */
-						refreshAllAndRender();
-					} else {
-						status.className = 'upload-status error';
-						status.textContent = data.error || 'Erro ao enviar.';
-						btnUpload.disabled = false;
-					}
-				})
-				.catch(function() {
-					status.className = 'upload-status error';
-					status.textContent = 'Erro de conex\u00e3o ao enviar arquivos.';
-					btnUpload.disabled = false;
-				});
-		});
-	}
-	</script>
+        <!-- HOME -->
+        <div id="screen-home" class="screen active">
+                <div class="home-header">
+                        <div class="home-logo">
+                                <img src="assets/images/icon.png" height="48" alt="Karaoke">
+                        </div>
+                        <div class="home-title-block">
+                                <h1 class="home-title">Karaoke Player</h1>
+                                <p class="home-subtitle" id="home-subtitle">Carregando catálogo...</p>
+                        </div>
+                </div>
+                <div class="home-menu" id="home-menu">
+                        <div class="home-card focusable" data-action="open-songs" tabindex="0">
+                                <div class="home-card-icon">&#9835;</div>
+                                <div class="home-card-label">MUSICAS</div>
+                                <div class="home-card-desc">Escolha da lista</div>
+                        </div>
+                        <div class="home-card focusable" data-action="open-upload-screen" tabindex="0">
+                                <div class="home-card-icon">&#8679;</div>
+                                <div class="home-card-label">ADICIONAR</div>
+                                <div class="home-card-desc">Envie .kar/.mid ao catálogo</div>
+                        </div>
+                        <div class="home-card focusable" data-action="open-themes" tabindex="0">
+                                <div class="home-card-icon">&#9790;</div>
+                                <div class="home-card-label">TEMA</div>
+                                <div class="home-card-desc">Mude o visual</div>
+                        </div>
+                </div>
+                <div class="home-hint">
+                        <span class="hint-key">&#9660; &#9650;</span> Navegar
+                        <span class="hint-key">ENTER</span> Confirmar
+                        <span class="hint-key">ESC</span> Voltar
+                </div>
+        </div>
+
+        <!-- SONGS LIST -->
+        <div id="screen-songs" class="screen">
+                <div class="list-header-bar">
+                        <button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
+                        <h2 class="list-title">Selecionar Musica</h2>
+                </div>
+                <div class="category-switcher">
+                        <button class="cat-arrow focusable" data-action="cat-prev" tabindex="0">&#9664;</button>
+                        <span class="cat-label" id="cat-label">INTERNACIONAL</span>
+                        <button class="cat-arrow focusable" data-action="cat-next" tabindex="0">&#9654;</button>
+                </div>
+                <div class="search-bar-wrap">
+                        <input type="text" id="song-search" class="song-search-input" placeholder="&#128269; Pesquisar música..." autocomplete="off" />
+                </div>
+                <div class="song-list-container">
+                        <div id="songlist" class="song-list">
+                                <div class="song-item loading">Carregando...</div>
+                        </div>
+                </div>
+                <div class="home-hint">
+                        <span class="hint-key">&#9660; &#9650;</span> Navegar
+                        <span class="hint-key">ENTER</span> Tocar
+                        <span class="hint-key">&#9664; &#9654;</span> Categoria
+                        <span class="hint-key">ESC / BACK</span> Voltar
+                </div>
+        </div>
+
+        <!-- UPLOAD -->
+        <div id="screen-upload" class="screen">
+                <div class="list-header-bar">
+                        <button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
+                        <h2 class="list-title">Adicionar Músicas</h2>
+                </div>
+                <div class="upload-body">
+                        <div class="upload-category-row">
+                                <span class="upload-label">Categoria:</span>
+                                <label class="upload-radio-label">
+                                        <input type="radio" name="upload-category" value="internacional" checked> Internacional
+                                </label>
+                                <label class="upload-radio-label">
+                                        <input type="radio" name="upload-category" value="nacional"> Nacional
+                                </label>
+                        </div>
+                        <div class="upload-drop-zone" id="upload-drop-zone">
+                                <div class="upload-drop-icon">&#8679;</div>
+                                <div class="upload-drop-text">Arraste arquivos aqui ou clique para selecionar</div>
+                                <div class="upload-drop-sub">.kar e .mid suportados — múltiplos arquivos permitidos</div>
+                                <input type="file" id="upload-file-input" accept=".mid,.midi,.kar" multiple style="display:none">
+                        </div>
+                        <div id="upload-file-list" class="upload-file-list"></div>
+                        <div id="upload-status" class="upload-status"></div>
+                        <div class="upload-actions">
+                                <button class="upload-btn focusable" id="btn-upload" tabindex="0" disabled>&#8679; Adicionar ao Catálogo</button>
+                        </div>
+                </div>
+        </div>
+
+        <!-- THEMES -->
+        <div id="screen-themes" class="screen">
+                <div class="list-header-bar">
+                        <button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
+                        <h2 class="list-title">Escolher Tema</h2>
+                </div>
+                <div class="theme-grid">
+                        <div class="theme-card basic focusable" data-theme="basic" tabindex="0">
+                                <div class="theme-preview basic">
+                                        <span class="previous">Anterior</span><br>
+                                        <span class="active">Atual</span>
+                                        <span class="inactive"> proximo</span>
+                                </div>
+                                <div class="theme-name">Basic</div>
+                        </div>
+                        <div class="theme-card sunset focusable" data-theme="sunset" tabindex="0">
+                                <div class="theme-preview sunset">
+                                        <span class="previous">Anterior</span><br>
+                                        <span class="active">Atual</span>
+                                        <span class="inactive"> proximo</span>
+                                </div>
+                                <div class="theme-name">Sunset</div>
+                        </div>
+                        <div class="theme-card christmas focusable" data-theme="christmas" tabindex="0">
+                                <div class="theme-preview christmas">
+                                        <span class="previous">Anterior</span><br>
+                                        <span class="active">Atual</span>
+                                        <span class="inactive"> proximo</span>
+                                </div>
+                                <div class="theme-name">Christmas</div>
+                        </div>
+                </div>
+                <div class="home-hint">
+                        <span class="hint-key">&#9660; &#9650; &#9664; &#9654;</span> Navegar
+                        <span class="hint-key">ENTER</span> Selecionar
+                        <span class="hint-key">ESC</span> Voltar
+                </div>
+        </div>
+
+        <!-- PLAYER -->
+        <div id="screen-player" class="screen">
+                <!-- Background image layer (filled via JS on each song load) -->
+                <div id="player-bg-image" class="player-bg-image"></div>
+                <div class="player-bg-tint"></div>
+
+                <div id="player-hud" class="player-hud">
+                        <div class="player-hud-left">
+                                <span id="hud-song-name" class="hud-song-name">...</span>
+                        </div>
+                        <div class="player-hud-center">
+                                <div class="player-progress-bar">
+                                        <div id="progress-fill" class="progress-fill"></div>
+                                </div>
+                                <span id="hud-time" class="hud-time">0:00</span>
+                        </div>
+                        <div class="player-hud-right">
+                                <span id="hud-state" class="hud-state">&#9654;</span>
+                        </div>
+                </div>
+
+                <!-- Queue HUD -->
+                <div id="queue-hud" class="queue-hud">
+                        <div class="queue-hud-title">&#9783; FILA</div>
+                        <div id="queue-hud-list" class="queue-hud-list"></div>
+                </div>
+
+                <div id="karaoke" class="karaoke-display">
+                        <span class="previous">***</span><br>
+                        <span class="inactive">Karaoke </span><span class="active">Player</span><br>
+                        <span class="next">***</span>
+                </div>
+
+                <!-- Number input panel -->
+                <div id="queue-number-panel" class="queue-number-panel">
+                        <div class="queue-number-hint">Adicionar à fila</div>
+                        <div class="queue-number-display">
+                                <span class="queue-number-hash">#</span>
+                                <span id="queue-number-digits" class="queue-number-digits">_</span>
+                        </div>
+                        <div class="queue-number-sub">ENTER para confirmar &bull; ESC para cancelar</div>
+                </div>
+
+                <!-- Countdown overlay -->
+                <div id="queue-countdown-overlay" class="queue-countdown-overlay">
+                        <div class="countdown-label">Próxima Música</div>
+                        <div id="countdown-song-title" class="countdown-song-title"></div>
+                        <div id="countdown-timer" class="countdown-timer">10</div>
+                        <div class="countdown-sub">Iniciando em breve...</div>
+                </div>
+
+                <div id="player-controls-bar" class="player-controls-bar hidden-controls">
+                        <button class="ctrl-btn focusable" data-action="back-home" tabindex="0">&#8962; Menu</button>
+                        <button class="ctrl-btn focusable" data-action="prev-song" tabindex="0">&#8826; Anterior</button>
+                        <button class="ctrl-btn focusable" id="btn-play-pause" data-action="play-pause" tabindex="0">&#9646;&#9646; Pausar</button>
+                        <button class="ctrl-btn focusable" data-action="next-song" tabindex="0">Proxima &#8827;</button>
+                        <button class="ctrl-btn focusable" data-action="stop" tabindex="0">&#9632; Parar</button>
+                </div>
+        </div>
+
+        <input type="file" id="inputfile" accept=".mid,.midi,.kar" style="display:none">
+
+        <script src="assets/js/player.js"></script>
+        <script src="config.js"></script>
+        <script src="assets/js/ui.js"></script>
+        <script>
+        /* ── Playlist paths (single source of truth) ── */
+        var NACIONAL_PATH     = 'musicas/';
+        var INTERNACIONAL_PATH = 'assets/music/';
+
+        /* Nacional songs are numbered 1..N
+           Internacional songs are numbered N+1..N+M
+           These globals hold the full arrays so any function can resolve numbers. */
+        var nacionalPlaylist      = [];   /* 1-based slot 1..N */
+        var internacionalPlaylist = [];   /* 1-based slot N+1..N+M */
+
+        /* ── Categories (for switcher UI) ── */
+        var categories = [
+                {label: 'INTERNACIONAL', path: INTERNACIONAL_PATH},
+                {label: 'NACIONAL',      path: NACIONAL_PATH}
+        ];
+        var currentCategoryIndex = 0;
+
+        /* ── Queue state ── */
+        var songQueue             = [];
+        var queueCountdownActive  = false;
+        var queueCountdownInterval = null;
+
+        /* ── Number-input state ── */
+        var queueDigits    = '';
+        var queueDigitTimer = null;
+        var DIGIT_TIMEOUT  = 3000; /* ms of inactivity before panel auto-closes */
+
+        /* ── Song-end detection ── */
+        var songEndArmed       = false;
+        var prevOntickPosition = -1;
+
+        /* ════════════════════════════════════════
+           STARTUP
+           ════════════════════════════════════════ */
+        window.onload = function() {
+                var hash = document.location.hash;
+                var themes = ['#sunset', '#basic', '#christmas', '#none'];
+                var theme = themes.indexOf(hash) >= 0 ? hash.substring(1) : (window.defaultTheme || 'sunset');
+                document.body.className = theme;
+
+                player = new MIDIPlayer('inputfile');
+                player.onload = function(song) {
+                        player.play();
+                        updatePlayerHUD(song);
+                };
+                player.ontick = function(song, position) {
+                        updateProgress(song, position);
+                        detectSongEnd(song, position);
+                };
+
+                if (document.location.search.length > 1) {
+                        playlistPath = document.location.search.substring(1);
+                }
+
+                initUI();
+                initUploadScreen();
+
+                document.getElementById('song-search').addEventListener('input', function() {
+                        filterSongs(this.value);
+                });
+
+                /* Load both playlists before rendering the first category */
+                loadBothPlaylists(function() {
+                        updateHomeSubtitle();
+                        updateCategoryLabel();
+                        renderCurrentCategory();
+                });
+        };
+
+        /* ════════════════════════════════════════
+           DUAL-PLAYLIST LOADING
+           ════════════════════════════════════════ */
+
+        /* Fetch both playlists from disk, populate the global arrays, then call cb(). */
+        function loadBothPlaylists(cb) {
+                var pending = 2;
+                function done() { if (--pending === 0 && cb) cb(); }
+
+                fetch(NACIONAL_PATH + 'playlist.json')
+                        .then(function(r) { return r.json(); })
+                        .then(function(d) { nacionalPlaylist = d || []; done(); })
+                        .catch(function()  { nacionalPlaylist = []; done(); });
+
+                fetch(INTERNACIONAL_PATH + 'playlist.json')
+                        .then(function(r) { return r.json(); })
+                        .then(function(d) { internacionalPlaylist = d || []; done(); })
+                        .catch(function()  { internacionalPlaylist = []; done(); });
+        }
+
+        /* Refresh both playlists then re-render the currently visible category. */
+        function refreshAllAndRender() {
+                loadBothPlaylists(function() {
+                        updateHomeSubtitle();
+                        renderCurrentCategory();
+                });
+        }
+
+        function updateHomeSubtitle() {
+                var total = nacionalPlaylist.length + internacionalPlaylist.length;
+                var el = document.getElementById('home-subtitle');
+                if (el) el.textContent = total + ' musica' + (total !== 1 ? 's' : '') + ' no catalogo';
+        }
+
+        /* ════════════════════════════════════════
+           SONG LIST RENDERING  (with global numbers)
+           ════════════════════════════════════════ */
+
+        function renderCurrentCategory() {
+                var path = categories[currentCategoryIndex].path;
+                if (path === NACIONAL_PATH) {
+                        window.playlistData       = nacionalPlaylist;
+                        window.playlistPathLoaded = NACIONAL_PATH;
+                        renderSongList(nacionalPlaylist, NACIONAL_PATH, 0 /* offset: Nacional starts at 1 */);
+                } else {
+                        window.playlistData       = internacionalPlaylist;
+                        window.playlistPathLoaded = INTERNACIONAL_PATH;
+                        renderSongList(internacionalPlaylist, INTERNACIONAL_PATH, nacionalPlaylist.length /* offset */);
+                }
+        }
+
+        function renderSongList(data, pPath, offset) {
+                var list = document.getElementById('songlist');
+                list.innerHTML = '';
+                if (data.length === 0) {
+                        var empty = document.createElement('div');
+                        empty.className = 'song-item loading';
+                        empty.textContent = 'Nenhuma música nesta categoria';
+                        list.appendChild(empty);
+                        return;
+                }
+                for (var i = 0; i < data.length; i++) {
+                        (function(idx, name, path, globalNum) {
+                                var div = document.createElement('div');
+                                div.className = 'song-item focusable';
+                                div.tabIndex = 0;
+                                div.setAttribute('data-index', idx);
+                                div.setAttribute('data-filename', name);
+                                div.setAttribute('data-playlist-path', path);
+                                div.setAttribute('data-global-num', globalNum);
+                                var num = document.createElement('span');
+                                num.className = 'song-number';
+                                num.textContent = globalNum + '.';
+                                var nameEl = document.createElement('span');
+                                nameEl.className = 'song-name';
+                                nameEl.textContent = name;
+                                div.appendChild(num);
+                                div.appendChild(nameEl);
+                                div.addEventListener('click', function() { loadSong(path, name); });
+                                list.appendChild(div);
+                        })(i, data[i], pPath, offset + i + 1);
+                }
+        }
+
+        /* ════════════════════════════════════════
+           CATEGORY SWITCHER
+           ════════════════════════════════════════ */
+
+        function updateCategoryLabel() {
+                var el = document.getElementById('cat-label');
+                if (el) el.textContent = categories[currentCategoryIndex].label;
+        }
+
+        function switchCategory(dir) {
+                currentCategoryIndex = (currentCategoryIndex + dir + categories.length) % categories.length;
+                updateCategoryLabel();
+                var searchEl = document.getElementById('song-search');
+                if (searchEl) searchEl.value = '';
+                renderCurrentCategory();
+        }
+
+        /* ════════════════════════════════════════
+           SEARCH FILTER
+           ════════════════════════════════════════ */
+
+        function filterSongs(query) {
+                var q = query.trim().toLowerCase();
+                var items = document.querySelectorAll('#songlist .song-item:not(.loading)');
+                var visible = 0;
+                for (var i = 0; i < items.length; i++) {
+                        var name = (items[i].getAttribute('data-filename') || '').toLowerCase();
+                        var show = !q || name.indexOf(q) >= 0;
+                        items[i].style.display = show ? '' : 'none';
+                        if (show) visible++;
+                }
+                var noResult = document.getElementById('no-results');
+                if (q && visible === 0) {
+                        if (!noResult) {
+                                noResult = document.createElement('div');
+                                noResult.id = 'no-results';
+                                noResult.className = 'song-item loading';
+                                noResult.textContent = 'Nenhuma música encontrada';
+                                document.getElementById('songlist').appendChild(noResult);
+                        }
+                        noResult.style.display = '';
+                } else if (noResult) {
+                        noResult.style.display = 'none';
+                }
+        }
+
+        /* ════════════════════════════════════════
+           SONG-END DETECTION
+           ════════════════════════════════════════ */
+
+        function detectSongEnd(song, position) {
+                if (!song || !song.duration || song.duration < 2) return;
+                if (!songEndArmed && position > Math.min(5, song.duration * 0.3)) {
+                        songEndArmed = true;
+                }
+                if (songEndArmed && prevOntickPosition > song.duration * 0.85 && position < song.duration * 0.1) {
+                        songEndArmed = false;
+                        prevOntickPosition = -1;
+                        onSongEnd();
+                        return;
+                }
+                prevOntickPosition = position;
+        }
+
+        function onSongEnd() {
+                if (queueCountdownActive) return;
+                if (songQueue.length > 0) startQueueCountdown();
+        }
+
+        /* ════════════════════════════════════════
+           QUEUE MANAGEMENT
+           ════════════════════════════════════════ */
+
+        /* Resolve a 1-based global number to {path, filename}.
+           Nacional occupies slots 1..N, Internacional N+1..N+M. */
+        function resolveGlobalNumber(globalNum) {
+                var natCount = nacionalPlaylist.length;
+                var intCount = internacionalPlaylist.length;
+                if (globalNum < 1) return null;
+                if (globalNum <= natCount) {
+                        return {path: NACIONAL_PATH, filename: nacionalPlaylist[globalNum - 1]};
+                }
+                if (globalNum <= natCount + intCount) {
+                        return {path: INTERNACIONAL_PATH, filename: internacionalPlaylist[globalNum - natCount - 1]};
+                }
+                return null;
+        }
+
+        function addToQueue(globalNum) {
+                var resolved = resolveGlobalNumber(globalNum);
+                if (!resolved) return false;
+                songQueue.push({path: resolved.path, filename: resolved.filename, number: globalNum});
+                updateQueueHUD();
+                return true;
+        }
+
+        function updateQueueHUD() {
+                var hud = document.getElementById('queue-hud');
+                var list = document.getElementById('queue-hud-list');
+                if (!hud || !list) return;
+                if (songQueue.length === 0) { hud.classList.remove('visible'); return; }
+                hud.classList.add('visible');
+                list.innerHTML = '';
+                for (var i = 0; i < Math.min(songQueue.length, 6); i++) {
+                        var item = document.createElement('div');
+                        item.className = 'queue-hud-item';
+                        item.textContent = '#' + songQueue[i].number + ' ' + songQueue[i].filename;
+                        list.appendChild(item);
+                }
+                if (songQueue.length > 6) {
+                        var more = document.createElement('div');
+                        more.className = 'queue-hud-item queue-hud-more';
+                        more.textContent = '+ ' + (songQueue.length - 6) + ' mais...';
+                        list.appendChild(more);
+                }
+        }
+
+        function startQueueCountdown() {
+                if (songQueue.length === 0) return;
+                queueCountdownActive = true;
+                if (typeof player !== 'undefined' && player) player.stop();
+
+                var next = songQueue[0];
+                var overlay = document.getElementById('queue-countdown-overlay');
+                var titleEl = document.getElementById('countdown-song-title');
+                var timerEl = document.getElementById('countdown-timer');
+
+                titleEl.textContent = next.filename;
+                timerEl.textContent = '10';
+                overlay.classList.add('visible');
+
+                var count = 10;
+                queueCountdownInterval = setInterval(function() {
+                        count--;
+                        timerEl.textContent = count;
+                        if (count <= 0) {
+                                clearInterval(queueCountdownInterval);
+                                queueCountdownInterval = null;
+                                overlay.classList.remove('visible');
+                                queueCountdownActive = false;
+                                var song = songQueue.shift();
+                                updateQueueHUD();
+                                loadSong(song.path, song.filename);
+                        }
+                }, 1000);
+        }
+
+        function cancelCountdown() {
+                if (!queueCountdownActive) return;
+                clearInterval(queueCountdownInterval);
+                queueCountdownInterval = null;
+                queueCountdownActive = false;
+                var overlay = document.getElementById('queue-countdown-overlay');
+                if (overlay) overlay.classList.remove('visible');
+                songQueue.shift();
+                updateQueueHUD();
+        }
+
+        /* ════════════════════════════════════════
+           NUMBER INPUT FOR QUEUE
+           ════════════════════════════════════════ */
+
+        function handleQueueNumberKey(digit) {
+                if (queueDigits.length >= 5) return; /* max 5 digits (up to 99999 songs) */
+                queueDigits += digit;
+                renderQueueNumberPanel();
+                resetQueueDigitTimer();
+        }
+
+        function commitQueueNumber() {
+                if (queueDigits === '') return;
+                var num = parseInt(queueDigits, 10);
+                clearQueueNumberPanel();
+                if (addToQueue(num)) {
+                        flashQueueConfirm('\u2714 #' + num + ' adicionado');
+                } else {
+                        flashQueueConfirm('\u2718 N\u00famero inv\u00e1lido');
+                }
+        }
+
+        function backspaceQueueNumber() {
+                if (queueDigits.length === 0) return;
+                queueDigits = queueDigits.slice(0, -1);
+                if (queueDigits === '') { hideQueueNumberPanel(); }
+                else { renderQueueNumberPanel(); resetQueueDigitTimer(); }
+        }
+
+        function clearQueueNumberPanel() {
+                queueDigits = '';
+                if (queueDigitTimer) { clearTimeout(queueDigitTimer); queueDigitTimer = null; }
+                hideQueueNumberPanel();
+        }
+
+        function hideQueueNumberPanel() {
+                var panel = document.getElementById('queue-number-panel');
+                if (panel) panel.classList.remove('visible');
+        }
+
+        function renderQueueNumberPanel() {
+                var panel = document.getElementById('queue-number-panel');
+                var digEl = document.getElementById('queue-number-digits');
+                if (!panel || !digEl) return;
+                digEl.textContent = queueDigits || '_';
+                panel.classList.add('visible');
+        }
+
+        function resetQueueDigitTimer() {
+                if (queueDigitTimer) clearTimeout(queueDigitTimer);
+                queueDigitTimer = setTimeout(function() {
+                        clearQueueNumberPanel();
+                }, DIGIT_TIMEOUT);
+        }
+
+        function flashQueueConfirm(msg) {
+                var panel = document.getElementById('queue-number-panel');
+                var digEl = document.getElementById('queue-number-digits');
+                if (!panel || !digEl) return;
+                panel.classList.add('visible', 'flash');
+                digEl.textContent = msg;
+                setTimeout(function() {
+                        panel.classList.remove('visible', 'flash');
+                }, 1800);
+        }
+
+        /* ════════════════════════════════════════
+           PLAYER HELPERS
+           ════════════════════════════════════════ */
+
+        window.onblur = function() {
+                if (typeof player !== 'undefined' && player) player.pause();
+        };
+        window.onfocus = function() {
+                if (typeof player !== 'undefined' && player) player.play();
+        };
+
+        function updatePlayerHUD(song) {
+                var nameEl = document.getElementById('hud-song-name');
+                if (nameEl && window.currentSongName) nameEl.textContent = window.currentSongName;
+        }
+
+        function updateProgress(song, position) {
+                if (!song) return;
+                var fill = document.getElementById('progress-fill');
+                var timeEl = document.getElementById('hud-time');
+                if (fill && song.duration > 0) fill.style.width = ((position / song.duration) * 100) + '%';
+                if (timeEl) {
+                        var mins = Math.floor(position / 60);
+                        var secs = Math.floor(position % 60);
+                        timeEl.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+                }
+        }
+
+        function loadSong(pPath, filename) {
+                window.currentSongName = filename;
+                /* Track song index within the currently displayed playlist for prev/next */
+                if (pPath === NACIONAL_PATH) {
+                        window.playlistData       = nacionalPlaylist;
+                        window.playlistPathLoaded = NACIONAL_PATH;
+                        window.currentSongIndex   = nacionalPlaylist.indexOf(filename);
+                } else {
+                        window.playlistData       = internacionalPlaylist;
+                        window.playlistPathLoaded = INTERNACIONAL_PATH;
+                        window.currentSongIndex   = internacionalPlaylist.indexOf(filename);
+                }
+                songEndArmed       = false;
+                prevOntickPosition = -1;
+                playUrl(pPath, filename);
+                showScreen('screen-player');
+                if (typeof showPlayerControls === 'function') showPlayerControls();
+                if (typeof pickRandomBackground === 'function') pickRandomBackground();
+        }
+
+        /* ════════════════════════════════════════
+           UPLOAD SCREEN
+           ════════════════════════════════════════ */
+
+        function initUploadScreen() {
+                var dropZone  = document.getElementById('upload-drop-zone');
+                var fileInput = document.getElementById('upload-file-input');
+                var btnUpload = document.getElementById('btn-upload');
+                var selectedFiles = [];
+
+                dropZone.addEventListener('click', function() { fileInput.click(); });
+                dropZone.addEventListener('dragover', function(e) {
+                        e.preventDefault(); dropZone.classList.add('dragover');
+                });
+                dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('dragover'); });
+                dropZone.addEventListener('drop', function(e) {
+                        e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files);
+                });
+                fileInput.addEventListener('change', function() { handleFiles(this.files); });
+
+                function handleFiles(files) {
+                        selectedFiles = [];
+                        for (var i = 0; i < files.length; i++) {
+                                var ext = files[i].name.split('.').pop().toLowerCase();
+                                if (ext === 'kar' || ext === 'mid' || ext === 'midi') selectedFiles.push(files[i]);
+                        }
+                        renderFileList();
+                }
+
+                function renderFileList() {
+                        var list = document.getElementById('upload-file-list');
+                        var status = document.getElementById('upload-status');
+                        status.textContent = '';
+                        status.className = 'upload-status';
+                        list.innerHTML = '';
+                        btnUpload.disabled = selectedFiles.length === 0;
+                        for (var i = 0; i < selectedFiles.length; i++) {
+                                var item = document.createElement('div');
+                                item.className = 'upload-file-item';
+                                item.innerHTML = '<span class="upload-file-icon">&#9835;</span><span class="upload-file-name">' + selectedFiles[i].name + '</span>';
+                                list.appendChild(item);
+                        }
+                }
+
+                btnUpload.addEventListener('click', function() {
+                        if (selectedFiles.length === 0) return;
+                        var catEl = document.querySelector('input[name="upload-category"]:checked');
+                        var category = catEl ? catEl.value : 'internacional';
+                        var formData = new FormData();
+                        formData.append('category', category);
+                        for (var i = 0; i < selectedFiles.length; i++) formData.append('files', selectedFiles[i]);
+
+                        var status = document.getElementById('upload-status');
+                        btnUpload.disabled = true;
+                        status.className = 'upload-status loading';
+                        status.textContent = 'Enviando...';
+
+                        fetch('/upload', {method: 'POST', body: formData})
+                                .then(function(r) { return r.json(); })
+                                .then(function(data) {
+                                        if (data.success) {
+                                                var lines = [];
+                                                if (data.saved.length > 0) lines.push('\u2714 ' + data.saved.length + ' m\u00fasica(s) adicionada(s) ao cat\u00e1logo.');
+                                                if (data.dup_name && data.dup_name.length > 0) lines.push('\u26a0 Mesmo nome j\u00e1 existe: ' + data.dup_name.join(', '));
+                                                if (data.dup_content && data.dup_content.length > 0) {
+                                                        lines.push('\u26a0 Conte\u00fado duplicado: ' + data.dup_content.map(function(d) {
+                                                                return '"' + d.file + '" (igual a "' + d.matches + '")';
+                                                        }).join('; '));
+                                                }
+                                                if (!data.saved.length && !(data.dup_name && data.dup_name.length) && !(data.dup_content && data.dup_content.length)) {
+                                                        lines.push('Nenhum arquivo novo foi adicionado.');
+                                                }
+                                                lines.push('Total no cat\u00e1logo: ' + data.total + ' m\u00fasica(s).');
+                                                status.className = data.saved.length > 0 ? 'upload-status success' : 'upload-status error';
+                                                status.innerHTML = lines.join('<br>');
+                                                selectedFiles = [];
+                                                fileInput.value = '';
+                                                renderFileList();
+                                                /* Reload both playlists so global numbering stays fresh */
+                                                refreshAllAndRender();
+                                        } else {
+                                                status.className = 'upload-status error';
+                                                status.textContent = data.error || 'Erro ao enviar.';
+                                                btnUpload.disabled = false;
+                                        }
+                                })
+                                .catch(function() {
+                                        status.className = 'upload-status error';
+                                        status.textContent = 'Erro de conex\u00e3o ao enviar arquivos.';
+                                        btnUpload.disabled = false;
+                                });
+                });
+        }
+        </script>
 </body>
 </html>

@@ -15,6 +15,10 @@ PLAYLIST_FILES = {
 }
 AUDIO_EXTENSIONS = {'.kar', '.mid', '.midi'}
 
+BACKGROUND_DIR  = 'assets/images/background'
+BACKGROUND_JSON = 'assets/images/background/backgrounds.json'
+IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'}
+
 
 def file_hash(data: bytes) -> str:
     return hashlib.md5(data).hexdigest()
@@ -65,6 +69,25 @@ def sync_playlist(category: str) -> list:
     return names
 
 
+def sync_backgrounds() -> list:
+    """Scan the background folder and rebuild backgrounds.json."""
+    os.makedirs(BACKGROUND_DIR, exist_ok=True)
+
+    files = []
+    try:
+        for entry in sorted(os.listdir(BACKGROUND_DIR), key=lambda s: s.lower()):
+            _, ext = os.path.splitext(entry)
+            if ext.lower() in IMAGE_EXTENSIONS:
+                files.append(entry)
+    except FileNotFoundError:
+        pass
+
+    with open(BACKGROUND_JSON, 'w', encoding='utf-8') as f:
+        json.dump(files, f, ensure_ascii=False, indent=4)
+
+    return files
+
+
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
@@ -99,19 +122,16 @@ def upload():
         data = file.read()
         h = file_hash(data)
 
-        # Check duplicate by content (hash)
         if h in hashes:
             existing_name = os.path.splitext(hashes[h])[0]
             dup_content.append({'file': name, 'matches': existing_name})
             continue
 
-        # Check duplicate by filename
         filepath = os.path.join(upload_dir, file.filename)
         if os.path.exists(filepath):
             dup_name.append(name)
             continue
 
-        # Save the file
         with open(filepath, 'wb') as f:
             f.write(data)
         hashes[h] = file.filename
@@ -128,6 +148,13 @@ def upload():
     })
 
 
+@app.route('/sync-backgrounds', methods=['POST'])
+def route_sync_backgrounds():
+    """Manually trigger a backgrounds.json rebuild (e.g. after adding images)."""
+    files = sync_backgrounds()
+    return jsonify({'success': True, 'count': len(files), 'files': files})
+
+
 @app.route('/<path:path>')
 def static_files(path):
     return send_from_directory('.', path)
@@ -136,4 +163,5 @@ def static_files(path):
 if __name__ == '__main__':
     for cat in UPLOAD_DIRS:
         sync_playlist(cat)
+    sync_backgrounds()
     app.run(host='0.0.0.0', port=5000, debug=False)
