@@ -333,9 +333,25 @@
                                 .then(function(r) { return r.json(); })
                                 .then(function(data) {
                                         if (data.success) {
-                                                var msg = data.saved.length + ' arquivo(s) enviado(s). Catálogo sincronizado: ' + data.total + ' música(s) no total.';
-                                                status.className = 'upload-status success';
-                                                status.textContent = msg;
+                                                var lines = [];
+                                                if (data.saved.length > 0) {
+                                                        lines.push('✔ ' + data.saved.length + ' música(s) adicionada(s) ao catálogo.');
+                                                }
+                                                if (data.dup_name && data.dup_name.length > 0) {
+                                                        lines.push('⚠ Mesmo nome já existe: ' + data.dup_name.join(', '));
+                                                }
+                                                if (data.dup_content && data.dup_content.length > 0) {
+                                                        var contentMsgs = data.dup_content.map(function(d) {
+                                                                return '"' + d.file + '" (igual a "' + d.matches + '")';
+                                                        });
+                                                        lines.push('⚠ Conteúdo duplicado: ' + contentMsgs.join('; '));
+                                                }
+                                                if (data.saved.length === 0 && (!data.dup_name || data.dup_name.length === 0) && (!data.dup_content || data.dup_content.length === 0)) {
+                                                        lines.push('Nenhum arquivo novo foi adicionado.');
+                                                }
+                                                lines.push('Total no catálogo: ' + data.total + ' música(s).');
+                                                status.className = data.saved.length > 0 ? 'upload-status success' : 'upload-status error';
+                                                status.innerHTML = lines.join('<br>');
                                                 selectedFiles = [];
                                                 fileInput.value = '';
                                                 renderFileList();

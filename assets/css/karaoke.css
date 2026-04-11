@@ -374,14 +374,19 @@ body {
         word-break: break-all;
 }
 .upload-status {
-        font-size: 0.95rem;
+        font-size: 0.92rem;
         min-height: 24px;
-        text-align: center;
+        text-align: left;
         width: 100%;
+        line-height: 1.7;
+        background: rgba(255,255,255,0.04);
+        border-radius: 10px;
+        padding: 10px 16px;
 }
+.upload-status:empty { display: none; }
 .upload-status.loading { color: rgba(255,255,255,0.6); }
 .upload-status.success { color: #6fd98c; }
-.upload-status.error   { color: #f07070; }
+.upload-status.error   { color: #f0a070; }
 .upload-actions {
         width: 100%;
         display: flex;
