@@ -1,316 +1,446 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-	<title>Karaoke Player</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<script src="assets/js/midiplayer/WebAudioFontPlayer.js"></script>
-	<script src="assets/js/midiplayer/MIDIFile.js"></script>
-	<script src="assets/js/midiplayer/MIDIPlayer.js"></script>
-	<script src="assets/js/midifile/MIDIFileHeader.js"></script>
-	<script src="assets/js/KarFile.js"></script>
-	<link rel="stylesheet" href="themes/basic/theme.css">
-	<link rel="stylesheet" href="themes/sunset/theme.css">
-	<link rel="stylesheet" href="themes/christmas/theme.css">
-	<link rel="stylesheet" href="assets/css/karaoke.css">
-	<link rel="shortcut icon" href="assets/images/icon.png">
+        <title>Karaoke Player</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="assets/js/midiplayer/WebAudioFontPlayer.js"></script>
+        <script src="assets/js/midiplayer/MIDIFile.js"></script>
+        <script src="assets/js/midiplayer/MIDIPlayer.js"></script>
+        <script src="assets/js/midifile/MIDIFileHeader.js"></script>
+        <script src="assets/js/KarFile.js"></script>
+        <link rel="stylesheet" href="themes/basic/theme.css">
+        <link rel="stylesheet" href="themes/sunset/theme.css">
+        <link rel="stylesheet" href="themes/christmas/theme.css">
+        <link rel="stylesheet" href="assets/css/karaoke.css">
+        <link rel="shortcut icon" href="assets/images/icon.png">
 </head>
 <body class="hidden" onunload="stop()">
 
-	<div id="screen-home" class="screen active">
-		<div class="home-header">
-			<div class="home-logo">
-				<img src="assets/images/icon.png" height="48" alt="Karaoke">
-			</div>
-			<div class="home-title-block">
-				<h1 class="home-title">Karaoke Player</h1>
-				<p class="home-subtitle" id="home-subtitle">Escolha uma musica e cante!</p>
-			</div>
-		</div>
+        <div id="screen-home" class="screen active">
+                <div class="home-header">
+                        <div class="home-logo">
+                                <img src="assets/images/icon.png" height="48" alt="Karaoke">
+                        </div>
+                        <div class="home-title-block">
+                                <h1 class="home-title">Karaoke Player</h1>
+                                <p class="home-subtitle" id="home-subtitle">Escolha uma musica e cante!</p>
+                        </div>
+                </div>
 
-		<div class="home-menu" id="home-menu">
-			<div class="home-card focusable" data-action="open-songs" tabindex="0">
-				<div class="home-card-icon">&#9835;</div>
-				<div class="home-card-label">MUSICAS</div>
-				<div class="home-card-desc">Escolha da lista</div>
-			</div>
-			<div class="home-card focusable" data-action="open-upload" tabindex="0">
-				<div class="home-card-icon">&#8679;</div>
-				<div class="home-card-label">ABRIR ARQUIVO</div>
-				<div class="home-card-desc">Carregue um .kar/.mid</div>
-			</div>
-			<div class="home-card focusable" data-action="open-themes" tabindex="0">
-				<div class="home-card-icon">&#9790;</div>
-				<div class="home-card-label">TEMA</div>
-				<div class="home-card-desc">Mude o visual</div>
-			</div>
-		</div>
+                <div class="home-menu" id="home-menu">
+                        <div class="home-card focusable" data-action="open-songs" tabindex="0">
+                                <div class="home-card-icon">&#9835;</div>
+                                <div class="home-card-label">MUSICAS</div>
+                                <div class="home-card-desc">Escolha da lista</div>
+                        </div>
+                        <div class="home-card focusable" data-action="open-upload-screen" tabindex="0">
+                                <div class="home-card-icon">&#8679;</div>
+                                <div class="home-card-label">ADICIONAR</div>
+                                <div class="home-card-desc">Envie .kar/.mid ao catálogo</div>
+                        </div>
+                        <div class="home-card focusable" data-action="open-themes" tabindex="0">
+                                <div class="home-card-icon">&#9790;</div>
+                                <div class="home-card-label">TEMA</div>
+                                <div class="home-card-desc">Mude o visual</div>
+                        </div>
+                </div>
 
-		<div class="home-hint">
-			<span class="hint-key">&#9660; &#9650;</span> Navegar
-			<span class="hint-key">ENTER</span> Confirmar
-			<span class="hint-key">ESC</span> Voltar
-		</div>
-	</div>
+                <div class="home-hint">
+                        <span class="hint-key">&#9660; &#9650;</span> Navegar
+                        <span class="hint-key">ENTER</span> Confirmar
+                        <span class="hint-key">ESC</span> Voltar
+                </div>
+        </div>
 
-	<div id="screen-songs" class="screen">
-		<div class="list-header-bar">
-			<button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
-			<h2 class="list-title">Selecionar Musica</h2>
-		</div>
-		<div class="category-switcher">
-			<button class="cat-arrow focusable" data-action="cat-prev" tabindex="0">&#9664;</button>
-			<span class="cat-label" id="cat-label">INTERNACIONAL</span>
-			<button class="cat-arrow focusable" data-action="cat-next" tabindex="0">&#9654;</button>
-		</div>
-		<div class="search-bar-wrap">
-			<input type="text" id="song-search" class="song-search-input" placeholder="&#128269; Pesquisar música..." autocomplete="off" />
-		</div>
-		<div class="song-list-container">
-			<div id="songlist" class="song-list">
-				<div class="song-item loading">Carregando...</div>
-			</div>
-		</div>
-		<div class="home-hint">
-			<span class="hint-key">&#9660; &#9650;</span> Navegar
-			<span class="hint-key">ENTER</span> Tocar
-			<span class="hint-key">&#9664; &#9654;</span> Categoria
-			<span class="hint-key">ESC / BACK</span> Voltar
-		</div>
-	</div>
+        <div id="screen-songs" class="screen">
+                <div class="list-header-bar">
+                        <button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
+                        <h2 class="list-title">Selecionar Musica</h2>
+                </div>
+                <div class="category-switcher">
+                        <button class="cat-arrow focusable" data-action="cat-prev" tabindex="0">&#9664;</button>
+                        <span class="cat-label" id="cat-label">INTERNACIONAL</span>
+                        <button class="cat-arrow focusable" data-action="cat-next" tabindex="0">&#9654;</button>
+                </div>
+                <div class="search-bar-wrap">
+                        <input type="text" id="song-search" class="song-search-input" placeholder="&#128269; Pesquisar música..." autocomplete="off" />
+                </div>
+                <div class="song-list-container">
+                        <div id="songlist" class="song-list">
+                                <div class="song-item loading">Carregando...</div>
+                        </div>
+                </div>
+                <div class="home-hint">
+                        <span class="hint-key">&#9660; &#9650;</span> Navegar
+                        <span class="hint-key">ENTER</span> Tocar
+                        <span class="hint-key">&#9664; &#9654;</span> Categoria
+                        <span class="hint-key">ESC / BACK</span> Voltar
+                </div>
+        </div>
 
-	<div id="screen-themes" class="screen">
-		<div class="list-header-bar">
-			<button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
-			<h2 class="list-title">Escolher Tema</h2>
-		</div>
-		<div class="theme-grid">
-			<div class="theme-card basic focusable" data-theme="basic" tabindex="0">
-				<div class="theme-preview basic">
-					<span class="previous">Anterior</span><br>
-					<span class="active">Atual</span>
-					<span class="inactive"> proximo</span>
-				</div>
-				<div class="theme-name">Basic</div>
-			</div>
-			<div class="theme-card sunset focusable" data-theme="sunset" tabindex="0">
-				<div class="theme-preview sunset">
-					<span class="previous">Anterior</span><br>
-					<span class="active">Atual</span>
-					<span class="inactive"> proximo</span>
-				</div>
-				<div class="theme-name">Sunset</div>
-			</div>
-			<div class="theme-card christmas focusable" data-theme="christmas" tabindex="0">
-				<div class="theme-preview christmas">
-					<span class="previous">Anterior</span><br>
-					<span class="active">Atual</span>
-					<span class="inactive"> proximo</span>
-				</div>
-				<div class="theme-name">Christmas</div>
-			</div>
-		</div>
-		<div class="home-hint">
-			<span class="hint-key">&#9660; &#9650; &#9664; &#9654;</span> Navegar
-			<span class="hint-key">ENTER</span> Selecionar
-			<span class="hint-key">ESC</span> Voltar
-		</div>
-	</div>
+        <div id="screen-upload" class="screen">
+                <div class="list-header-bar">
+                        <button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
+                        <h2 class="list-title">Adicionar Músicas</h2>
+                </div>
+                <div class="upload-body">
+                        <div class="upload-category-row">
+                                <span class="upload-label">Categoria:</span>
+                                <label class="upload-radio-label">
+                                        <input type="radio" name="upload-category" value="internacional" checked> Internacional
+                                </label>
+                                <label class="upload-radio-label">
+                                        <input type="radio" name="upload-category" value="nacional"> Nacional
+                                </label>
+                        </div>
+                        <div class="upload-drop-zone" id="upload-drop-zone">
+                                <div class="upload-drop-icon">&#8679;</div>
+                                <div class="upload-drop-text">Arraste arquivos aqui ou clique para selecionar</div>
+                                <div class="upload-drop-sub">.kar e .mid suportados — múltiplos arquivos permitidos</div>
+                                <input type="file" id="upload-file-input" accept=".mid,.midi,.kar" multiple style="display:none">
+                        </div>
+                        <div id="upload-file-list" class="upload-file-list"></div>
+                        <div id="upload-status" class="upload-status"></div>
+                        <div class="upload-actions">
+                                <button class="upload-btn focusable" id="btn-upload" tabindex="0" disabled>&#8679; Adicionar ao Catálogo</button>
+                        </div>
+                </div>
+        </div>
 
-	<div id="screen-player" class="screen">
-		<div id="player-hud" class="player-hud">
-			<div class="player-hud-left">
-				<span id="hud-song-name" class="hud-song-name">...</span>
-			</div>
-			<div class="player-hud-center">
-				<div class="player-progress-bar">
-					<div id="progress-fill" class="progress-fill"></div>
-				</div>
-				<span id="hud-time" class="hud-time">0:00</span>
-			</div>
-			<div class="player-hud-right">
-				<span id="hud-state" class="hud-state">&#9654;</span>
-			</div>
-		</div>
+        <div id="screen-themes" class="screen">
+                <div class="list-header-bar">
+                        <button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
+                        <h2 class="list-title">Escolher Tema</h2>
+                </div>
+                <div class="theme-grid">
+                        <div class="theme-card basic focusable" data-theme="basic" tabindex="0">
+                                <div class="theme-preview basic">
+                                        <span class="previous">Anterior</span><br>
+                                        <span class="active">Atual</span>
+                                        <span class="inactive"> proximo</span>
+                                </div>
+                                <div class="theme-name">Basic</div>
+                        </div>
+                        <div class="theme-card sunset focusable" data-theme="sunset" tabindex="0">
+                                <div class="theme-preview sunset">
+                                        <span class="previous">Anterior</span><br>
+                                        <span class="active">Atual</span>
+                                        <span class="inactive"> proximo</span>
+                                </div>
+                                <div class="theme-name">Sunset</div>
+                        </div>
+                        <div class="theme-card christmas focusable" data-theme="christmas" tabindex="0">
+                                <div class="theme-preview christmas">
+                                        <span class="previous">Anterior</span><br>
+                                        <span class="active">Atual</span>
+                                        <span class="inactive"> proximo</span>
+                                </div>
+                                <div class="theme-name">Christmas</div>
+                        </div>
+                </div>
+                <div class="home-hint">
+                        <span class="hint-key">&#9660; &#9650; &#9664; &#9654;</span> Navegar
+                        <span class="hint-key">ENTER</span> Selecionar
+                        <span class="hint-key">ESC</span> Voltar
+                </div>
+        </div>
 
-		<div id="karaoke" class="karaoke-display">
-			<span class="previous">***</span><br>
-			<span class="inactive">Karaoke </span><span class="active">Player</span><br>
-			<span class="next">***</span>
-		</div>
+        <div id="screen-player" class="screen">
+                <div id="player-hud" class="player-hud">
+                        <div class="player-hud-left">
+                                <span id="hud-song-name" class="hud-song-name">...</span>
+                        </div>
+                        <div class="player-hud-center">
+                                <div class="player-progress-bar">
+                                        <div id="progress-fill" class="progress-fill"></div>
+                                </div>
+                                <span id="hud-time" class="hud-time">0:00</span>
+                        </div>
+                        <div class="player-hud-right">
+                                <span id="hud-state" class="hud-state">&#9654;</span>
+                        </div>
+                </div>
 
-		<div id="player-controls-bar" class="player-controls-bar hidden-controls">
-			<button class="ctrl-btn focusable" data-action="back-home" tabindex="0">&#8962; Menu</button>
-			<button class="ctrl-btn focusable" data-action="prev-song" tabindex="0">&#8826; Anterior</button>
-			<button class="ctrl-btn focusable" id="btn-play-pause" data-action="play-pause" tabindex="0">&#9646;&#9646; Pausar</button>
-			<button class="ctrl-btn focusable" data-action="next-song" tabindex="0">Proxima &#8827;</button>
-			<button class="ctrl-btn focusable" data-action="stop" tabindex="0">&#9632; Parar</button>
-		</div>
-	</div>
+                <div id="karaoke" class="karaoke-display">
+                        <span class="previous">***</span><br>
+                        <span class="inactive">Karaoke </span><span class="active">Player</span><br>
+                        <span class="next">***</span>
+                </div>
 
-	<input type="file" id="inputfile" accept=".mid,.midi,.kar" onchange="readKar(this)" style="display:none">
+                <div id="player-controls-bar" class="player-controls-bar hidden-controls">
+                        <button class="ctrl-btn focusable" data-action="back-home" tabindex="0">&#8962; Menu</button>
+                        <button class="ctrl-btn focusable" data-action="prev-song" tabindex="0">&#8826; Anterior</button>
+                        <button class="ctrl-btn focusable" id="btn-play-pause" data-action="play-pause" tabindex="0">&#9646;&#9646; Pausar</button>
+                        <button class="ctrl-btn focusable" data-action="next-song" tabindex="0">Proxima &#8827;</button>
+                        <button class="ctrl-btn focusable" data-action="stop" tabindex="0">&#9632; Parar</button>
+                </div>
+        </div>
 
-	<script src="assets/js/player.js"></script>
-	<script src="config.js"></script>
-	<script src="assets/js/ui.js"></script>
-	<script>
-	var categories = [
-		{label: 'INTERNACIONAL', path: 'assets/music/'},
-		{label: 'NACIONAL', path: 'musicas/'}
-	];
-	var currentCategoryIndex = 0;
+        <input type="file" id="inputfile" accept=".mid,.midi,.kar" style="display:none">
 
-	window.onload = function() {
-		var hash = document.location.hash;
-		var themes = ["#sunset", "#basic", "#christmas", "#none"];
-		var theme = themes.indexOf(hash) >= 0 ? hash.substring(1) : (window.defaultTheme || "sunset");
-		document.body.className = theme;
+        <script src="assets/js/player.js"></script>
+        <script src="config.js"></script>
+        <script src="assets/js/ui.js"></script>
+        <script>
+        var categories = [
+                {label: 'INTERNACIONAL', path: 'assets/music/'},
+                {label: 'NACIONAL', path: 'musicas/'}
+        ];
+        var currentCategoryIndex = 0;
 
-		player = new MIDIPlayer('inputfile');
-		player.onload = function(song) {
-			player.play();
-			updatePlayerHUD(song);
-		};
-		player.ontick = function(song, position) {
-			updateProgress(song, position);
-		};
+        window.onload = function() {
+                var hash = document.location.hash;
+                var themes = ["#sunset", "#basic", "#christmas", "#none"];
+                var theme = themes.indexOf(hash) >= 0 ? hash.substring(1) : (window.defaultTheme || "sunset");
+                document.body.className = theme;
 
-		if (document.location.search.length > 1) {
-			playlistPath = document.location.search.substring(1);
-		}
+                player = new MIDIPlayer('inputfile');
+                player.onload = function(song) {
+                        player.play();
+                        updatePlayerHUD(song);
+                };
+                player.ontick = function(song, position) {
+                        updateProgress(song, position);
+                };
 
-		updateCategoryLabel();
-		loadPlaylist(categories[currentCategoryIndex].path);
-		initUI();
+                if (document.location.search.length > 1) {
+                        playlistPath = document.location.search.substring(1);
+                }
 
-		document.getElementById('song-search').addEventListener('input', function() {
-			filterSongs(this.value);
-		});
-	};
+                updateCategoryLabel();
+                loadPlaylist(categories[currentCategoryIndex].path);
+                initUI();
+                initUploadScreen();
 
-	function updateCategoryLabel() {
-		var el = document.getElementById('cat-label');
-		if (el) el.textContent = categories[currentCategoryIndex].label;
-	}
+                document.getElementById('song-search').addEventListener('input', function() {
+                        filterSongs(this.value);
+                });
+        };
 
-	function switchCategory(dir) {
-		currentCategoryIndex = (currentCategoryIndex + dir + categories.length) % categories.length;
-		updateCategoryLabel();
-		var searchEl = document.getElementById('song-search');
-		if (searchEl) searchEl.value = '';
-		loadPlaylist(categories[currentCategoryIndex].path);
-	}
+        function updateCategoryLabel() {
+                var el = document.getElementById('cat-label');
+                if (el) el.textContent = categories[currentCategoryIndex].label;
+        }
 
-	function filterSongs(query) {
-		var q = query.trim().toLowerCase();
-		var items = document.querySelectorAll('#songlist .song-item:not(.loading)');
-		var visible = 0;
-		for (var i = 0; i < items.length; i++) {
-			var name = (items[i].getAttribute('data-filename') || '').toLowerCase();
-			var show = !q || name.indexOf(q) >= 0;
-			items[i].style.display = show ? '' : 'none';
-			if (show) visible++;
-		}
-		var noResult = document.getElementById('no-results');
-		if (q && visible === 0) {
-			if (!noResult) {
-				noResult = document.createElement('div');
-				noResult.id = 'no-results';
-				noResult.className = 'song-item loading';
-				noResult.textContent = 'Nenhuma música encontrada';
-				document.getElementById('songlist').appendChild(noResult);
-			}
-			noResult.style.display = '';
-		} else if (noResult) {
-			noResult.style.display = 'none';
-		}
-	}
+        function switchCategory(dir) {
+                currentCategoryIndex = (currentCategoryIndex + dir + categories.length) % categories.length;
+                updateCategoryLabel();
+                var searchEl = document.getElementById('song-search');
+                if (searchEl) searchEl.value = '';
+                loadPlaylist(categories[currentCategoryIndex].path);
+        }
 
-	window.onblur = function() {
-		if (typeof player !== 'undefined' && player) {
-			player.pause();
-		}
-	};
-	window.onfocus = function() {
-		if (typeof player !== 'undefined' && player) {
-			player.play();
-		}
-	};
+        function filterSongs(query) {
+                var q = query.trim().toLowerCase();
+                var items = document.querySelectorAll('#songlist .song-item:not(.loading)');
+                var visible = 0;
+                for (var i = 0; i < items.length; i++) {
+                        var name = (items[i].getAttribute('data-filename') || '').toLowerCase();
+                        var show = !q || name.indexOf(q) >= 0;
+                        items[i].style.display = show ? '' : 'none';
+                        if (show) visible++;
+                }
+                var noResult = document.getElementById('no-results');
+                if (q && visible === 0) {
+                        if (!noResult) {
+                                noResult = document.createElement('div');
+                                noResult.id = 'no-results';
+                                noResult.className = 'song-item loading';
+                                noResult.textContent = 'Nenhuma música encontrada';
+                                document.getElementById('songlist').appendChild(noResult);
+                        }
+                        noResult.style.display = '';
+                } else if (noResult) {
+                        noResult.style.display = 'none';
+                }
+        }
 
-	function updatePlayerHUD(song) {
-		var nameEl = document.getElementById('hud-song-name');
-		if (nameEl && window.currentSongName) {
-			nameEl.textContent = window.currentSongName;
-		}
-	}
+        function initUploadScreen() {
+                var dropZone = document.getElementById('upload-drop-zone');
+                var fileInput = document.getElementById('upload-file-input');
+                var btnUpload = document.getElementById('btn-upload');
+                var selectedFiles = [];
 
-	function updateProgress(song, position) {
-		if (!song) return;
-		var fill = document.getElementById('progress-fill');
-		var timeEl = document.getElementById('hud-time');
-		if (fill && song.duration > 0) {
-			fill.style.width = ((position / song.duration) * 100) + '%';
-		}
-		if (timeEl) {
-			var mins = Math.floor(position / 60);
-			var secs = Math.floor(position % 60);
-			timeEl.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
-		}
-	}
+                dropZone.addEventListener('click', function() {
+                        fileInput.click();
+                });
 
-	function loadSong(playlistPathArg, filename) {
-		window.currentSongName = filename;
-		if (window.playlistData) {
-			window.currentSongIndex = window.playlistData.indexOf(filename);
-		}
-		playUrl(playlistPathArg, filename);
-		showScreen('screen-player');
-		if (typeof showPlayerControls === 'function') showPlayerControls();
-	}
+                dropZone.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        dropZone.classList.add('dragover');
+                });
+                dropZone.addEventListener('dragleave', function() {
+                        dropZone.classList.remove('dragover');
+                });
+                dropZone.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        dropZone.classList.remove('dragover');
+                        handleFiles(e.dataTransfer.files);
+                });
 
-	function loadPlaylist(pPath) {
-		var list = document.getElementById('songlist');
-		list.innerHTML = '<div class="song-item loading">Carregando...</div>';
-		fetch(pPath + 'playlist.json')
-			.then(function(response) { return response.json(); })
-			.then(function(data) {
-				var count = data.length;
-				document.getElementById('home-subtitle').textContent = count + ' musica' + (count !== 1 ? 's' : '') + ' no catalogo';
-				window.playlistData = data;
-				window.playlistPathLoaded = pPath;
-				list.innerHTML = '';
-				if (count === 0) {
-					var empty = document.createElement('div');
-					empty.className = 'song-item loading';
-					empty.textContent = 'Nenhuma música nesta categoria';
-					list.appendChild(empty);
-					return;
-				}
-				for (var i = 0; i < data.length; i++) {
-					var div = document.createElement('div');
-					div.className = 'song-item focusable';
-					div.tabIndex = 0;
-					div.setAttribute('data-index', i);
-					div.setAttribute('data-filename', data[i]);
-					div.setAttribute('data-playlist-path', pPath);
-					var num = document.createElement('span');
-					num.className = 'song-number';
-					num.textContent = (i + 1) + '.';
-					var name = document.createElement('span');
-					name.className = 'song-name';
-					name.textContent = data[i];
-					div.appendChild(num);
-					div.appendChild(name);
-					div.addEventListener('click', function() {
-						loadSong(this.getAttribute('data-playlist-path'), this.getAttribute('data-filename'));
-					});
-					list.appendChild(div);
-				}
-			})
-			.catch(function() {
-				list.innerHTML = '<div class="song-item loading">Erro ao carregar playlist</div>';
-				document.getElementById('home-subtitle').textContent = 'Nenhuma musica no catalogo';
-			});
-	}
-	</script>
+                fileInput.addEventListener('change', function() {
+                        handleFiles(this.files);
+                });
+
+                function handleFiles(files) {
+                        selectedFiles = [];
+                        for (var i = 0; i < files.length; i++) {
+                                var f = files[i];
+                                var ext = f.name.split('.').pop().toLowerCase();
+                                if (ext === 'kar' || ext === 'mid' || ext === 'midi') {
+                                        selectedFiles.push(f);
+                                }
+                        }
+                        renderFileList();
+                }
+
+                function renderFileList() {
+                        var list = document.getElementById('upload-file-list');
+                        var status = document.getElementById('upload-status');
+                        status.textContent = '';
+                        status.className = 'upload-status';
+                        list.innerHTML = '';
+                        if (selectedFiles.length === 0) {
+                                btnUpload.disabled = true;
+                                return;
+                        }
+                        btnUpload.disabled = false;
+                        for (var i = 0; i < selectedFiles.length; i++) {
+                                var item = document.createElement('div');
+                                item.className = 'upload-file-item';
+                                item.innerHTML = '<span class="upload-file-icon">&#9835;</span><span class="upload-file-name">' + selectedFiles[i].name + '</span>';
+                                list.appendChild(item);
+                        }
+                }
+
+                btnUpload.addEventListener('click', function() {
+                        if (selectedFiles.length === 0) return;
+                        var categoryEl = document.querySelector('input[name="upload-category"]:checked');
+                        var category = categoryEl ? categoryEl.value : 'internacional';
+
+                        var formData = new FormData();
+                        formData.append('category', category);
+                        for (var i = 0; i < selectedFiles.length; i++) {
+                                formData.append('files', selectedFiles[i]);
+                        }
+
+                        var status = document.getElementById('upload-status');
+                        btnUpload.disabled = true;
+                        status.className = 'upload-status loading';
+                        status.textContent = 'Enviando...';
+
+                        fetch('/upload', {method: 'POST', body: formData})
+                                .then(function(r) { return r.json(); })
+                                .then(function(data) {
+                                        if (data.success) {
+                                                var msg = data.added.length + ' música(s) adicionada(s) ao catálogo.';
+                                                if (data.skipped.length > 0) msg += ' ' + data.skipped.length + ' já existia(m).';
+                                                status.className = 'upload-status success';
+                                                status.textContent = msg;
+                                                selectedFiles = [];
+                                                fileInput.value = '';
+                                                renderFileList();
+                                                loadPlaylist(categories[currentCategoryIndex].path);
+                                        } else {
+                                                status.className = 'upload-status error';
+                                                status.textContent = data.error || 'Erro ao enviar.';
+                                                btnUpload.disabled = false;
+                                        }
+                                })
+                                .catch(function() {
+                                        status.className = 'upload-status error';
+                                        status.textContent = 'Erro de conexão ao enviar arquivos.';
+                                        btnUpload.disabled = false;
+                                });
+                });
+        }
+
+        window.onblur = function() {
+                if (typeof player !== 'undefined' && player) {
+                        player.pause();
+                }
+        };
+        window.onfocus = function() {
+                if (typeof player !== 'undefined' && player) {
+                        player.play();
+                }
+        };
+
+        function updatePlayerHUD(song) {
+                var nameEl = document.getElementById('hud-song-name');
+                if (nameEl && window.currentSongName) {
+                        nameEl.textContent = window.currentSongName;
+                }
+        }
+
+        function updateProgress(song, position) {
+                if (!song) return;
+                var fill = document.getElementById('progress-fill');
+                var timeEl = document.getElementById('hud-time');
+                if (fill && song.duration > 0) {
+                        fill.style.width = ((position / song.duration) * 100) + '%';
+                }
+                if (timeEl) {
+                        var mins = Math.floor(position / 60);
+                        var secs = Math.floor(position % 60);
+                        timeEl.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+                }
+        }
+
+        function loadSong(playlistPathArg, filename) {
+                window.currentSongName = filename;
+                if (window.playlistData) {
+                        window.currentSongIndex = window.playlistData.indexOf(filename);
+                }
+                playUrl(playlistPathArg, filename);
+                showScreen('screen-player');
+                if (typeof showPlayerControls === 'function') showPlayerControls();
+        }
+
+        function loadPlaylist(pPath) {
+                var list = document.getElementById('songlist');
+                list.innerHTML = '<div class="song-item loading">Carregando...</div>';
+                fetch(pPath + 'playlist.json')
+                        .then(function(response) { return response.json(); })
+                        .then(function(data) {
+                                var count = data.length;
+                                document.getElementById('home-subtitle').textContent = count + ' musica' + (count !== 1 ? 's' : '') + ' no catalogo';
+                                window.playlistData = data;
+                                window.playlistPathLoaded = pPath;
+                                list.innerHTML = '';
+                                if (count === 0) {
+                                        var empty = document.createElement('div');
+                                        empty.className = 'song-item loading';
+                                        empty.textContent = 'Nenhuma música nesta categoria';
+                                        list.appendChild(empty);
+                                        return;
+                                }
+                                for (var i = 0; i < data.length; i++) {
+                                        var div = document.createElement('div');
+                                        div.className = 'song-item focusable';
+                                        div.tabIndex = 0;
+                                        div.setAttribute('data-index', i);
+                                        div.setAttribute('data-filename', data[i]);
+                                        div.setAttribute('data-playlist-path', pPath);
+                                        var num = document.createElement('span');
+                                        num.className = 'song-number';
+                                        num.textContent = (i + 1) + '.';
+                                        var name = document.createElement('span');
+                                        name.className = 'song-name';
+                                        name.textContent = data[i];
+                                        div.appendChild(num);
+                                        div.appendChild(name);
+                                        div.addEventListener('click', function() {
+                                                loadSong(this.getAttribute('data-playlist-path'), this.getAttribute('data-filename'));
+                                        });
+                                        list.appendChild(div);
+                                }
+                        })
+                        .catch(function() {
+                                list.innerHTML = '<div class="song-item loading">Erro ao carregar playlist</div>';
+                                document.getElementById('home-subtitle').textContent = 'Nenhuma musica no catalogo';
+                        });
+        }
+        </script>
 </body>
 </html>
