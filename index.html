@@ -57,6 +57,14 @@
 			<button class="back-btn focusable" data-action="back" tabindex="0">&#8592; Voltar</button>
 			<h2 class="list-title">Selecionar Musica</h2>
 		</div>
+		<div class="category-switcher">
+			<button class="cat-arrow focusable" data-action="cat-prev" tabindex="0">&#9664;</button>
+			<span class="cat-label" id="cat-label">INTERNACIONAL</span>
+			<button class="cat-arrow focusable" data-action="cat-next" tabindex="0">&#9654;</button>
+		</div>
+		<div class="search-bar-wrap">
+			<input type="text" id="song-search" class="song-search-input" placeholder="&#128269; Pesquisar música..." autocomplete="off" />
+		</div>
 		<div class="song-list-container">
 			<div id="songlist" class="song-list">
 				<div class="song-item loading">Carregando...</div>
@@ -65,6 +73,7 @@
 		<div class="home-hint">
 			<span class="hint-key">&#9660; &#9650;</span> Navegar
 			<span class="hint-key">ENTER</span> Tocar
+			<span class="hint-key">&#9664; &#9654;</span> Categoria
 			<span class="hint-key">ESC / BACK</span> Voltar
 		</div>
 	</div>
@@ -144,6 +153,12 @@
 	<script src="config.js"></script>
 	<script src="assets/js/ui.js"></script>
 	<script>
+	var categories = [
+		{label: 'INTERNACIONAL', path: 'assets/music/'},
+		{label: 'NACIONAL', path: 'musicas/'}
+	];
+	var currentCategoryIndex = 0;
+
 	window.onload = function() {
 		var hash = document.location.hash;
 		var themes = ["#sunset", "#basic", "#christmas", "#none"];
@@ -162,9 +177,53 @@
 		if (document.location.search.length > 1) {
 			playlistPath = document.location.search.substring(1);
 		}
-		loadPlaylist(window.playlistPath);
+
+		updateCategoryLabel();
+		loadPlaylist(categories[currentCategoryIndex].path);
 		initUI();
+
+		document.getElementById('song-search').addEventListener('input', function() {
+			filterSongs(this.value);
+		});
 	};
+
+	function updateCategoryLabel() {
+		var el = document.getElementById('cat-label');
+		if (el) el.textContent = categories[currentCategoryIndex].label;
+	}
+
+	function switchCategory(dir) {
+		currentCategoryIndex = (currentCategoryIndex + dir + categories.length) % categories.length;
+		updateCategoryLabel();
+		var searchEl = document.getElementById('song-search');
+		if (searchEl) searchEl.value = '';
+		loadPlaylist(categories[currentCategoryIndex].path);
+	}
+
+	function filterSongs(query) {
+		var q = query.trim().toLowerCase();
+		var items = document.querySelectorAll('#songlist .song-item:not(.loading)');
+		var visible = 0;
+		for (var i = 0; i < items.length; i++) {
+			var name = (items[i].getAttribute('data-filename') || '').toLowerCase();
+			var show = !q || name.indexOf(q) >= 0;
+			items[i].style.display = show ? '' : 'none';
+			if (show) visible++;
+		}
+		var noResult = document.getElementById('no-results');
+		if (q && visible === 0) {
+			if (!noResult) {
+				noResult = document.createElement('div');
+				noResult.id = 'no-results';
+				noResult.className = 'song-item loading';
+				noResult.textContent = 'Nenhuma música encontrada';
+				document.getElementById('songlist').appendChild(noResult);
+			}
+			noResult.style.display = '';
+		} else if (noResult) {
+			noResult.style.display = 'none';
+		}
+	}
 
 	window.onblur = function() {
 		if (typeof player !== 'undefined' && player) {
@@ -209,6 +268,8 @@
 	}
 
 	function loadPlaylist(pPath) {
+		var list = document.getElementById('songlist');
+		list.innerHTML = '<div class="song-item loading">Carregando...</div>';
 		fetch(pPath + 'playlist.json')
 			.then(function(response) { return response.json(); })
 			.then(function(data) {
@@ -216,8 +277,14 @@
 				document.getElementById('home-subtitle').textContent = count + ' musica' + (count !== 1 ? 's' : '') + ' no catalogo';
 				window.playlistData = data;
 				window.playlistPathLoaded = pPath;
-				var list = document.getElementById('songlist');
 				list.innerHTML = '';
+				if (count === 0) {
+					var empty = document.createElement('div');
+					empty.className = 'song-item loading';
+					empty.textContent = 'Nenhuma música nesta categoria';
+					list.appendChild(empty);
+					return;
+				}
 				for (var i = 0; i < data.length; i++) {
 					var div = document.createElement('div');
 					div.className = 'song-item focusable';
@@ -240,6 +307,7 @@
 				}
 			})
 			.catch(function() {
+				list.innerHTML = '<div class="song-item loading">Erro ao carregar playlist</div>';
 				document.getElementById('home-subtitle').textContent = 'Nenhuma musica no catalogo';
 			});
 	}

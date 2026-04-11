@@ -101,6 +101,12 @@ function handleAction(action, el) {
 		case 'open-themes':
 			showScreen('screen-themes');
 			break;
+		case 'cat-prev':
+			if (typeof switchCategory === 'function') switchCategory(-1);
+			break;
+		case 'cat-next':
+			if (typeof switchCategory === 'function') switchCategory(1);
+			break;
 		case 'back':
 			showScreen('screen-home');
 			break;
@@ -237,6 +243,9 @@ function initUI() {
 			}
 		}
 
+		var searchFocused = document.activeElement && document.activeElement.id === 'song-search';
+		if (searchFocused) return;
+
 		if (key === 'ArrowDown' || key === 40) {
 			e.preventDefault();
 			moveFocus(1);
@@ -245,10 +254,18 @@ function initUI() {
 			moveFocus(-1);
 		} else if (key === 'ArrowRight' || key === 39) {
 			e.preventDefault();
-			if (currentScreen !== 'screen-player') moveFocus(1);
+			if (currentScreen === 'screen-songs') {
+				if (typeof switchCategory === 'function') switchCategory(1);
+			} else if (currentScreen !== 'screen-player') {
+				moveFocus(1);
+			}
 		} else if (key === 'ArrowLeft' || key === 37) {
 			e.preventDefault();
-			if (currentScreen !== 'screen-player') moveFocus(-1);
+			if (currentScreen === 'screen-songs') {
+				if (typeof switchCategory === 'function') switchCategory(-1);
+			} else if (currentScreen !== 'screen-player') {
+				moveFocus(-1);
+			}
 		} else if (key === 'Enter' || key === 13 || key === 'OK') {
 			e.preventDefault();
 			activateFocused();
