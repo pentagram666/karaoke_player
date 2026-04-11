@@ -24,7 +24,7 @@
 			</div>
 			<div class="home-title-block">
 				<h1 class="home-title">Karaoke Player</h1>
-				<p class="home-subtitle" id="home-subtitle">Escolha uma musica e cante!</p>
+				<p class="home-subtitle" id="home-subtitle">Carregando catálogo...</p>
 			</div>
 		</div>
 		<div class="home-menu" id="home-menu">
@@ -183,7 +183,7 @@
 				<span class="queue-number-hash">#</span>
 				<span id="queue-number-digits" class="queue-number-digits">_</span>
 			</div>
-			<div class="queue-number-sub">ENTER para confirmar • ESC para cancelar</div>
+			<div class="queue-number-sub">ENTER para confirmar &bull; ESC para cancelar</div>
 		</div>
 
 		<!-- Countdown overlay -->
@@ -209,30 +209,44 @@
 	<script src="config.js"></script>
 	<script src="assets/js/ui.js"></script>
 	<script>
-	/* ── Categories ── */
+	/* ── Playlist paths (single source of truth) ── */
+	var NACIONAL_PATH     = 'musicas/';
+	var INTERNACIONAL_PATH = 'assets/music/';
+
+	/* Nacional songs are numbered 1..N
+	   Internacional songs are numbered N+1..N+M
+	   These globals hold the full arrays so any function can resolve numbers. */
+	var nacionalPlaylist      = [];   /* 1-based slot 1..N */
+	var internacionalPlaylist = [];   /* 1-based slot N+1..N+M */
+
+	/* ── Categories (for switcher UI) ── */
 	var categories = [
-		{label: 'INTERNACIONAL', path: 'assets/music/'},
-		{label: 'NACIONAL', path: 'musicas/'}
+		{label: 'INTERNACIONAL', path: INTERNACIONAL_PATH},
+		{label: 'NACIONAL',      path: NACIONAL_PATH}
 	];
 	var currentCategoryIndex = 0;
 
 	/* ── Queue state ── */
-	var songQueue = [];
-	var queueCountdownActive = false;
+	var songQueue             = [];
+	var queueCountdownActive  = false;
 	var queueCountdownInterval = null;
 
 	/* ── Number-input state ── */
-	var queueDigits = '';
+	var queueDigits    = '';
 	var queueDigitTimer = null;
+	var DIGIT_TIMEOUT  = 3000; /* ms of inactivity before panel auto-closes */
 
 	/* ── Song-end detection ── */
-	var songEndArmed = false;
+	var songEndArmed       = false;
 	var prevOntickPosition = -1;
 
+	/* ════════════════════════════════════════
+	   STARTUP
+	   ════════════════════════════════════════ */
 	window.onload = function() {
 		var hash = document.location.hash;
-		var themes = ["#sunset", "#basic", "#christmas", "#none"];
-		var theme = themes.indexOf(hash) >= 0 ? hash.substring(1) : (window.defaultTheme || "sunset");
+		var themes = ['#sunset', '#basic', '#christmas', '#none'];
+		var theme = themes.indexOf(hash) >= 0 ? hash.substring(1) : (window.defaultTheme || 'sunset');
 		document.body.className = theme;
 
 		player = new MIDIPlayer('inputfile');
@@ -249,17 +263,155 @@
 			playlistPath = document.location.search.substring(1);
 		}
 
-		updateCategoryLabel();
-		loadPlaylist(categories[currentCategoryIndex].path);
 		initUI();
 		initUploadScreen();
 
 		document.getElementById('song-search').addEventListener('input', function() {
 			filterSongs(this.value);
 		});
+
+		/* Load both playlists before rendering the first category */
+		loadBothPlaylists(function() {
+			updateHomeSubtitle();
+			updateCategoryLabel();
+			renderCurrentCategory();
+		});
 	};
 
-	/* ── Song-end detection ── */
+	/* ════════════════════════════════════════
+	   DUAL-PLAYLIST LOADING
+	   ════════════════════════════════════════ */
+
+	/* Fetch both playlists from disk, populate the global arrays, then call cb(). */
+	function loadBothPlaylists(cb) {
+		var pending = 2;
+		function done() { if (--pending === 0 && cb) cb(); }
+
+		fetch(NACIONAL_PATH + 'playlist.json')
+			.then(function(r) { return r.json(); })
+			.then(function(d) { nacionalPlaylist = d || []; done(); })
+			.catch(function()  { nacionalPlaylist = []; done(); });
+
+		fetch(INTERNACIONAL_PATH + 'playlist.json')
+			.then(function(r) { return r.json(); })
+			.then(function(d) { internacionalPlaylist = d || []; done(); })
+			.catch(function()  { internacionalPlaylist = []; done(); });
+	}
+
+	/* Refresh both playlists then re-render the currently visible category. */
+	function refreshAllAndRender() {
+		loadBothPlaylists(function() {
+			updateHomeSubtitle();
+			renderCurrentCategory();
+		});
+	}
+
+	function updateHomeSubtitle() {
+		var total = nacionalPlaylist.length + internacionalPlaylist.length;
+		var el = document.getElementById('home-subtitle');
+		if (el) el.textContent = total + ' musica' + (total !== 1 ? 's' : '') + ' no catalogo';
+	}
+
+	/* ════════════════════════════════════════
+	   SONG LIST RENDERING  (with global numbers)
+	   ════════════════════════════════════════ */
+
+	function renderCurrentCategory() {
+		var path = categories[currentCategoryIndex].path;
+		if (path === NACIONAL_PATH) {
+			window.playlistData       = nacionalPlaylist;
+			window.playlistPathLoaded = NACIONAL_PATH;
+			renderSongList(nacionalPlaylist, NACIONAL_PATH, 0 /* offset: Nacional starts at 1 */);
+		} else {
+			window.playlistData       = internacionalPlaylist;
+			window.playlistPathLoaded = INTERNACIONAL_PATH;
+			renderSongList(internacionalPlaylist, INTERNACIONAL_PATH, nacionalPlaylist.length /* offset */);
+		}
+	}
+
+	function renderSongList(data, pPath, offset) {
+		var list = document.getElementById('songlist');
+		list.innerHTML = '';
+		if (data.length === 0) {
+			var empty = document.createElement('div');
+			empty.className = 'song-item loading';
+			empty.textContent = 'Nenhuma música nesta categoria';
+			list.appendChild(empty);
+			return;
+		}
+		for (var i = 0; i < data.length; i++) {
+			(function(idx, name, path, globalNum) {
+				var div = document.createElement('div');
+				div.className = 'song-item focusable';
+				div.tabIndex = 0;
+				div.setAttribute('data-index', idx);
+				div.setAttribute('data-filename', name);
+				div.setAttribute('data-playlist-path', path);
+				div.setAttribute('data-global-num', globalNum);
+				var num = document.createElement('span');
+				num.className = 'song-number';
+				num.textContent = globalNum + '.';
+				var nameEl = document.createElement('span');
+				nameEl.className = 'song-name';
+				nameEl.textContent = name;
+				div.appendChild(num);
+				div.appendChild(nameEl);
+				div.addEventListener('click', function() { loadSong(path, name); });
+				list.appendChild(div);
+			})(i, data[i], pPath, offset + i + 1);
+		}
+	}
+
+	/* ════════════════════════════════════════
+	   CATEGORY SWITCHER
+	   ════════════════════════════════════════ */
+
+	function updateCategoryLabel() {
+		var el = document.getElementById('cat-label');
+		if (el) el.textContent = categories[currentCategoryIndex].label;
+	}
+
+	function switchCategory(dir) {
+		currentCategoryIndex = (currentCategoryIndex + dir + categories.length) % categories.length;
+		updateCategoryLabel();
+		var searchEl = document.getElementById('song-search');
+		if (searchEl) searchEl.value = '';
+		renderCurrentCategory();
+	}
+
+	/* ════════════════════════════════════════
+	   SEARCH FILTER
+	   ════════════════════════════════════════ */
+
+	function filterSongs(query) {
+		var q = query.trim().toLowerCase();
+		var items = document.querySelectorAll('#songlist .song-item:not(.loading)');
+		var visible = 0;
+		for (var i = 0; i < items.length; i++) {
+			var name = (items[i].getAttribute('data-filename') || '').toLowerCase();
+			var show = !q || name.indexOf(q) >= 0;
+			items[i].style.display = show ? '' : 'none';
+			if (show) visible++;
+		}
+		var noResult = document.getElementById('no-results');
+		if (q && visible === 0) {
+			if (!noResult) {
+				noResult = document.createElement('div');
+				noResult.id = 'no-results';
+				noResult.className = 'song-item loading';
+				noResult.textContent = 'Nenhuma música encontrada';
+				document.getElementById('songlist').appendChild(noResult);
+			}
+			noResult.style.display = '';
+		} else if (noResult) {
+			noResult.style.display = 'none';
+		}
+	}
+
+	/* ════════════════════════════════════════
+	   SONG-END DETECTION
+	   ════════════════════════════════════════ */
+
 	function detectSongEnd(song, position) {
 		if (!song || !song.duration || song.duration < 2) return;
 		if (!songEndArmed && position > Math.min(5, song.duration * 0.3)) {
@@ -276,20 +428,32 @@
 
 	function onSongEnd() {
 		if (queueCountdownActive) return;
-		if (songQueue.length > 0) {
-			startQueueCountdown();
-		}
+		if (songQueue.length > 0) startQueueCountdown();
 	}
 
-	/* ── Queue management ── */
-	function addToQueue(oneBased) {
-		var idx = oneBased - 1;
-		if (!window.playlistData || idx < 0 || idx >= window.playlistData.length) return false;
-		songQueue.push({
-			path: window.playlistPathLoaded,
-			filename: window.playlistData[idx],
-			number: oneBased
-		});
+	/* ════════════════════════════════════════
+	   QUEUE MANAGEMENT
+	   ════════════════════════════════════════ */
+
+	/* Resolve a 1-based global number to {path, filename}.
+	   Nacional occupies slots 1..N, Internacional N+1..N+M. */
+	function resolveGlobalNumber(globalNum) {
+		var natCount = nacionalPlaylist.length;
+		var intCount = internacionalPlaylist.length;
+		if (globalNum < 1) return null;
+		if (globalNum <= natCount) {
+			return {path: NACIONAL_PATH, filename: nacionalPlaylist[globalNum - 1]};
+		}
+		if (globalNum <= natCount + intCount) {
+			return {path: INTERNACIONAL_PATH, filename: internacionalPlaylist[globalNum - natCount - 1]};
+		}
+		return null;
+	}
+
+	function addToQueue(globalNum) {
+		var resolved = resolveGlobalNumber(globalNum);
+		if (!resolved) return false;
+		songQueue.push({path: resolved.path, filename: resolved.filename, number: globalNum});
 		updateQueueHUD();
 		return true;
 	}
@@ -298,16 +462,13 @@
 		var hud = document.getElementById('queue-hud');
 		var list = document.getElementById('queue-hud-list');
 		if (!hud || !list) return;
-		if (songQueue.length === 0) {
-			hud.classList.remove('visible');
-			return;
-		}
+		if (songQueue.length === 0) { hud.classList.remove('visible'); return; }
 		hud.classList.add('visible');
 		list.innerHTML = '';
 		for (var i = 0; i < Math.min(songQueue.length, 6); i++) {
 			var item = document.createElement('div');
 			item.className = 'queue-hud-item';
-			item.textContent = (i + 1) + '. ' + songQueue[i].filename;
+			item.textContent = '#' + songQueue[i].number + ' ' + songQueue[i].filename;
 			list.appendChild(item);
 		}
 		if (songQueue.length > 6) {
@@ -321,7 +482,6 @@
 	function startQueueCountdown() {
 		if (songQueue.length === 0) return;
 		queueCountdownActive = true;
-
 		if (typeof player !== 'undefined' && player) player.stop();
 
 		var next = songQueue[0];
@@ -360,9 +520,12 @@
 		updateQueueHUD();
 	}
 
-	/* ── Number-input for queue ── */
+	/* ════════════════════════════════════════
+	   NUMBER INPUT FOR QUEUE
+	   ════════════════════════════════════════ */
+
 	function handleQueueNumberKey(digit) {
-		if (queueDigits.length >= 3) return;
+		if (queueDigits.length >= 5) return; /* max 5 digits (up to 99999 songs) */
 		queueDigits += digit;
 		renderQueueNumberPanel();
 		resetQueueDigitTimer();
@@ -373,21 +536,17 @@
 		var num = parseInt(queueDigits, 10);
 		clearQueueNumberPanel();
 		if (addToQueue(num)) {
-			flashQueueConfirm('✔ #' + num + ' adicionado à fila');
+			flashQueueConfirm('\u2714 #' + num + ' adicionado');
 		} else {
-			flashQueueConfirm('✘ Número inválido');
+			flashQueueConfirm('\u2718 N\u00famero inv\u00e1lido');
 		}
 	}
 
 	function backspaceQueueNumber() {
 		if (queueDigits.length === 0) return;
 		queueDigits = queueDigits.slice(0, -1);
-		if (queueDigits === '') {
-			hideQueueNumberPanel();
-		} else {
-			renderQueueNumberPanel();
-			resetQueueDigitTimer();
-		}
+		if (queueDigits === '') { hideQueueNumberPanel(); }
+		else { renderQueueNumberPanel(); resetQueueDigitTimer(); }
 	}
 
 	function clearQueueNumberPanel() {
@@ -413,7 +572,7 @@
 		if (queueDigitTimer) clearTimeout(queueDigitTimer);
 		queueDigitTimer = setTimeout(function() {
 			clearQueueNumberPanel();
-		}, 4000);
+		}, DIGIT_TIMEOUT);
 	}
 
 	function flashQueueConfirm(msg) {
@@ -427,48 +586,59 @@
 		}, 1800);
 	}
 
-	/* ── Category & search ── */
-	function updateCategoryLabel() {
-		var el = document.getElementById('cat-label');
-		if (el) el.textContent = categories[currentCategoryIndex].label;
+	/* ════════════════════════════════════════
+	   PLAYER HELPERS
+	   ════════════════════════════════════════ */
+
+	window.onblur = function() {
+		if (typeof player !== 'undefined' && player) player.pause();
+	};
+	window.onfocus = function() {
+		if (typeof player !== 'undefined' && player) player.play();
+	};
+
+	function updatePlayerHUD(song) {
+		var nameEl = document.getElementById('hud-song-name');
+		if (nameEl && window.currentSongName) nameEl.textContent = window.currentSongName;
 	}
 
-	function switchCategory(dir) {
-		currentCategoryIndex = (currentCategoryIndex + dir + categories.length) % categories.length;
-		updateCategoryLabel();
-		var searchEl = document.getElementById('song-search');
-		if (searchEl) searchEl.value = '';
-		loadPlaylist(categories[currentCategoryIndex].path);
-	}
-
-	function filterSongs(query) {
-		var q = query.trim().toLowerCase();
-		var items = document.querySelectorAll('#songlist .song-item:not(.loading)');
-		var visible = 0;
-		for (var i = 0; i < items.length; i++) {
-			var name = (items[i].getAttribute('data-filename') || '').toLowerCase();
-			var show = !q || name.indexOf(q) >= 0;
-			items[i].style.display = show ? '' : 'none';
-			if (show) visible++;
-		}
-		var noResult = document.getElementById('no-results');
-		if (q && visible === 0) {
-			if (!noResult) {
-				noResult = document.createElement('div');
-				noResult.id = 'no-results';
-				noResult.className = 'song-item loading';
-				noResult.textContent = 'Nenhuma música encontrada';
-				document.getElementById('songlist').appendChild(noResult);
-			}
-			noResult.style.display = '';
-		} else if (noResult) {
-			noResult.style.display = 'none';
+	function updateProgress(song, position) {
+		if (!song) return;
+		var fill = document.getElementById('progress-fill');
+		var timeEl = document.getElementById('hud-time');
+		if (fill && song.duration > 0) fill.style.width = ((position / song.duration) * 100) + '%';
+		if (timeEl) {
+			var mins = Math.floor(position / 60);
+			var secs = Math.floor(position % 60);
+			timeEl.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
 		}
 	}
 
-	/* ── Upload screen ── */
+	function loadSong(pPath, filename) {
+		window.currentSongName = filename;
+		/* Track song index within the currently displayed playlist for prev/next */
+		if (pPath === NACIONAL_PATH) {
+			window.playlistData       = nacionalPlaylist;
+			window.playlistPathLoaded = NACIONAL_PATH;
+			window.currentSongIndex   = nacionalPlaylist.indexOf(filename);
+		} else {
+			window.playlistData       = internacionalPlaylist;
+			window.playlistPathLoaded = INTERNACIONAL_PATH;
+			window.currentSongIndex   = internacionalPlaylist.indexOf(filename);
+		}
+		songEndArmed       = false;
+		prevOntickPosition = -1;
+		playUrl(pPath, filename);
+		showScreen('screen-player');
+		if (typeof showPlayerControls === 'function') showPlayerControls();
+	}
+
+	/* ════════════════════════════════════════
+	   UPLOAD SCREEN
+	   ════════════════════════════════════════ */
+
 	function initUploadScreen() {
-		var dropZone = document.getElementById('upload-drop-zone');
+		var dropZone  = document.getElementById('upload-drop-zone');
 		var fileInput = document.getElementById('upload-file-input');
 		var btnUpload = document.getElementById('btn-upload');
 		var selectedFiles = [];
@@ -525,21 +695,24 @@
 				.then(function(data) {
 					if (data.success) {
 						var lines = [];
-						if (data.saved.length > 0) lines.push('✔ ' + data.saved.length + ' música(s) adicionada(s) ao catálogo.');
-						if (data.dup_name && data.dup_name.length > 0) lines.push('⚠ Mesmo nome já existe: ' + data.dup_name.join(', '));
+						if (data.saved.length > 0) lines.push('\u2714 ' + data.saved.length + ' m\u00fasica(s) adicionada(s) ao cat\u00e1logo.');
+						if (data.dup_name && data.dup_name.length > 0) lines.push('\u26a0 Mesmo nome j\u00e1 existe: ' + data.dup_name.join(', '));
 						if (data.dup_content && data.dup_content.length > 0) {
-							lines.push('⚠ Conteúdo duplicado: ' + data.dup_content.map(function(d) {
+							lines.push('\u26a0 Conte\u00fado duplicado: ' + data.dup_content.map(function(d) {
 								return '"' + d.file + '" (igual a "' + d.matches + '")';
 							}).join('; '));
 						}
-						if (!data.saved.length && !data.dup_name.length && !data.dup_content.length) lines.push('Nenhum arquivo novo foi adicionado.');
-						lines.push('Total no catálogo: ' + data.total + ' música(s).');
+						if (!data.saved.length && !(data.dup_name && data.dup_name.length) && !(data.dup_content && data.dup_content.length)) {
+							lines.push('Nenhum arquivo novo foi adicionado.');
+						}
+						lines.push('Total no cat\u00e1logo: ' + data.total + ' m\u00fasica(s).');
 						status.className = data.saved.length > 0 ? 'upload-status success' : 'upload-status error';
 						status.innerHTML = lines.join('<br>');
 						selectedFiles = [];
 						fileInput.value = '';
 						renderFileList();
-						loadPlaylist(categories[currentCategoryIndex].path);
+						/* Reload both playlists so global numbering stays fresh */
+						refreshAllAndRender();
 					} else {
 						status.className = 'upload-status error';
 						status.textContent = data.error || 'Erro ao enviar.';
@@ -548,90 +721,10 @@
 				})
 				.catch(function() {
 					status.className = 'upload-status error';
-					status.textContent = 'Erro de conexão ao enviar arquivos.';
+					status.textContent = 'Erro de conex\u00e3o ao enviar arquivos.';
 					btnUpload.disabled = false;
 				});
 		});
-	}
-
-	/* ── Player helpers ── */
-	window.onblur = function() {
-		if (typeof player !== 'undefined' && player) player.pause();
-	};
-	window.onfocus = function() {
-		if (typeof player !== 'undefined' && player) player.play();
-	};
-
-	function updatePlayerHUD(song) {
-		var nameEl = document.getElementById('hud-song-name');
-		if (nameEl && window.currentSongName) nameEl.textContent = window.currentSongName;
-	}
-
-	function updateProgress(song, position) {
-		if (!song) return;
-		var fill = document.getElementById('progress-fill');
-		var timeEl = document.getElementById('hud-time');
-		if (fill && song.duration > 0) fill.style.width = ((position / song.duration) * 100) + '%';
-		if (timeEl) {
-			var mins = Math.floor(position / 60);
-			var secs = Math.floor(position % 60);
-			timeEl.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
-		}
-	}
-
-	function loadSong(playlistPathArg, filename) {
-		window.currentSongName = filename;
-		if (window.playlistData) window.currentSongIndex = window.playlistData.indexOf(filename);
-		songEndArmed = false;
-		prevOntickPosition = -1;
-		playUrl(playlistPathArg, filename);
-		showScreen('screen-player');
-		if (typeof showPlayerControls === 'function') showPlayerControls();
-	}
-
-	function loadPlaylist(pPath) {
-		var list = document.getElementById('songlist');
-		list.innerHTML = '<div class="song-item loading">Carregando...</div>';
-		fetch(pPath + 'playlist.json')
-			.then(function(r) { return r.json(); })
-			.then(function(data) {
-				var count = data.length;
-				document.getElementById('home-subtitle').textContent = count + ' musica' + (count !== 1 ? 's' : '') + ' no catalogo';
-				window.playlistData = data;
-				window.playlistPathLoaded = pPath;
-				list.innerHTML = '';
-				if (count === 0) {
-					var empty = document.createElement('div');
-					empty.className = 'song-item loading';
-					empty.textContent = 'Nenhuma música nesta categoria';
-					list.appendChild(empty);
-					return;
-				}
-				for (var i = 0; i < data.length; i++) {
-					(function(idx, name, path) {
-						var div = document.createElement('div');
-						div.className = 'song-item focusable';
-						div.tabIndex = 0;
-						div.setAttribute('data-index', idx);
-						div.setAttribute('data-filename', name);
-						div.setAttribute('data-playlist-path', path);
-						var num = document.createElement('span');
-						num.className = 'song-number';
-						num.textContent = (idx + 1) + '.';
-						var nameEl = document.createElement('span');
-						nameEl.className = 'song-name';
-						nameEl.textContent = name;
-						div.appendChild(num);
-						div.appendChild(nameEl);
-						div.addEventListener('click', function() { loadSong(path, name); });
-						list.appendChild(div);
-					})(i, data[i], pPath);
-				}
-			})
-			.catch(function() {
-				list.innerHTML = '<div class="song-item loading">Erro ao carregar playlist</div>';
-				document.getElementById('home-subtitle').textContent = 'Nenhuma musica no catalogo';
-			});
 	}
 	</script>
 </body>
