@@ -35,5 +35,5 @@ externalPort = 80
 
 [deployment]
 deploymentTarget = "autoscale"
-publicDir = "."
-run = ["python3", "server.py"]
+run = ["gunicorn", "--bind=0.0.0.0:5000", "--reuse-port", "server:app"]
+build = ["pip", "install", "-r", "requirements.txt"]
