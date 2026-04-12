@@ -678,6 +678,34 @@ body {
         color: rgba(255,255,255,0.6);
 }
 
+/* ===== PLAYER BACKGROUND IMAGE ===== */
+#screen-player {
+        position: relative;
+}
+.player-bg-image {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: 0;
+        transition: background-image 0.6s ease;
+}
+.player-bg-tint {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.62);
+        z-index: 1;
+        pointer-events: none;
+}
+/* Flex children that must sit above the background layers */
+#player-hud,
+.karaoke-display,
+#player-controls-bar {
+        position: relative;
+        z-index: 2;
+}
+
 /* ===== KARAOKE DISPLAY ===== */
 .karaoke-display {
         flex: 1;
@@ -688,9 +716,55 @@ body {
         justify-content: center;
         text-align: center;
         padding: 24px 48px;
-        font-size: 2.8rem;
-        line-height: 1.5;
         overflow: hidden;
+        gap: 28px;
+}
+
+/* ── Current lyric line ── */
+.lyric-line {
+        font-size: 2.8rem;
+        font-weight: bold;
+        line-height: 1.4;
+        text-align: center;
+        max-width: 90%;
+        word-break: break-word;
+}
+
+/* Already-sung syllables → red/warm highlight */
+.lyric-sung {
+        color: #e84040;
+        text-shadow: 0 0 18px rgba(232, 64, 64, 0.55);
+        transition: none;
+}
+
+/* Still-to-be-sung syllables → muted gray */
+.lyric-pending {
+        color: rgba(255, 255, 255, 0.55);
+}
+
+/* Smaller preview of the NEXT line */
+.lyric-next-preview {
+        font-size: 1.4rem;
+        color: rgba(255, 255, 255, 0.28);
+        line-height: 1.3;
+        max-width: 80%;
+        word-break: break-word;
+}
+
+/* ── Line-change animations ── */
+@keyframes lyric-slide-up {
+        0%   { transform: translateY(0);    opacity: 1; }
+        100% { transform: translateY(-70px); opacity: 0; }
+}
+@keyframes lyric-slide-in {
+        0%   { transform: translateY(60px); opacity: 0; }
+        100% { transform: translateY(0);    opacity: 1; }
+}
+.lyric-exit {
+        animation: lyric-slide-up 0.30s ease-in forwards;
+}
+.lyric-enter {
+        animation: lyric-slide-in 0.36s ease-out forwards;
 }
 
 /* ===== PLAYER CONTROLS BAR ===== */
