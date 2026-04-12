@@ -213,6 +213,14 @@
         <script src="config.js"></script>
         <script src="assets/js/ui.js"></script>
         <script>
+        /* ── Song title formatter ── */
+        function formatSongTitle(raw) {
+                return raw
+                        .replace(/_\d+$/, '')  /* strip trailing _1, _01, _123 etc. */
+                        .replace(/_/g, ' ')    /* underscores → spaces */
+                        .trim();
+        }
+
         /* ── Playlist paths (single source of truth) ── */
         var NACIONAL_PATH     = 'musicas/';
         var INTERNACIONAL_PATH = 'assets/music/';
@@ -357,7 +365,7 @@
                                 num.textContent = globalNum + '.';
                                 var nameEl = document.createElement('span');
                                 nameEl.className = 'song-name';
-                                nameEl.textContent = name;
+                                nameEl.textContent = formatSongTitle(name);
                                 div.appendChild(num);
                                 div.appendChild(nameEl);
                                 div.addEventListener('click', function() { loadSong(path, name); });
@@ -472,7 +480,7 @@
                 for (var i = 0; i < Math.min(songQueue.length, 6); i++) {
                         var item = document.createElement('div');
                         item.className = 'queue-hud-item';
-                        item.textContent = '#' + songQueue[i].number + ' ' + songQueue[i].filename;
+                        item.textContent = '#' + songQueue[i].number + ' ' + formatSongTitle(songQueue[i].filename);
                         list.appendChild(item);
                 }
                 if (songQueue.length > 6) {
@@ -493,7 +501,7 @@
                 var titleEl = document.getElementById('countdown-song-title');
                 var timerEl = document.getElementById('countdown-timer');
 
-                titleEl.textContent = next.filename;
+                titleEl.textContent = formatSongTitle(next.filename);
                 timerEl.textContent = '10';
                 overlay.classList.add('visible');
 
@@ -603,7 +611,7 @@
 
         function updatePlayerHUD(song) {
                 var nameEl = document.getElementById('hud-song-name');
-                if (nameEl && window.currentSongName) nameEl.textContent = window.currentSongName;
+                if (nameEl && window.currentSongName) nameEl.textContent = formatSongTitle(window.currentSongName);
         }
 
         function updateProgress(song, position) {
