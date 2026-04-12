@@ -216,7 +216,7 @@
         /* ── Song title formatter ── */
         function formatSongTitle(raw) {
                 return raw
-                        .replace(/_\d+$/, '')  /* strip trailing _1, _01, _123 etc. */
+                        .replace(/_[a-zA-Z0-9]+$/, '')  /* strip trailing _1, _A, _BR, _01 etc. */
                         .replace(/_/g, ' ')    /* underscores → spaces */
                         .trim();
         }

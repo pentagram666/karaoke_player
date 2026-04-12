@@ -105,7 +105,7 @@ function loadKar(kar) {
         container = document.getElementById('karaoke');
         var hudName = document.getElementById('hud-song-name');
         if (hudName && kar.fileName) {
-                var displayName = kar.fileName.replace(/_\d+$/, '').replace(/_/g, ' ').trim();
+                var displayName = kar.fileName.replace(/_[a-zA-Z0-9]+$/, '').replace(/_/g, ' ').trim();
                 hudName.textContent = displayName;
         }
 
