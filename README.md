@@ -13,7 +13,7 @@ https://karaokeplayer--metalnation666.replit.app/#sunset
 
 ## 🎯 Objetivo
 
-Desenvolver uma aplicação web interativa para reprodução de karaokê, com suporte a catálogo personalizado de músicas e controle de execução em tempo real.
+Desenvolver uma aplicação web interativa para reprodução de karaokê, com suporte a catálogo personalizado de músicas e controle de execução em tempo real, inclusive em ambientes como TVs Smart com acesso web.
 
 ---
 
@@ -29,10 +29,16 @@ Desenvolver uma aplicação web interativa para reprodução de karaokê, com su
 
 ## ⚙️ Funcionalidades
 
-* 🎵 Reprodução de músicas no formato `.KAR` e `.MIDI`
-* 📂 Upload de arquivos de karaokê para o sistema
-* 📋 Criação e gerenciamento de playlist
+* 🎵 Reprodução de músicas nos formatos `.KAR` e `.MIDI`
+* 📂 Upload múltiplo de arquivos de karaokê
+* 🧠 Detecção automática de arquivos duplicados
+* 🏷️ Tratamento automático de nomes (ex: "_" → espaço)
+* 🌎 Classificação de músicas (Nacional / Internacional)
+* 📋 Criação e gerenciamento de playlists
 * 🔁 Execução automática de músicas em sequência
+* ➕ Adição dinâmica de músicas à fila durante a reprodução (sem limite de itens)
+* 🎹 Inserção rápida via número da música diretamente no player
+* 📺 Interface otimizada para uso em TVs Smart ou dispositivos com navegador
 * 🖥️ Interface interativa para controle de reprodução
 * 📁 Organização de catálogo de músicas
 
@@ -52,7 +58,7 @@ A aplicação utiliza uma estrutura híbrida:
 
 ### 1. Clone o repositório
 
-```bash
+```bash id="clone2"
 git clone https://github.com/pentagram666/karaoke_player.git
 ```
 
@@ -60,7 +66,7 @@ git clone https://github.com/pentagram666/karaoke_player.git
 
 ### 2. Acesse a pasta do projeto
 
-```bash
+```bash id="cd2"
 cd karaoke_player
 ```
 
@@ -68,7 +74,7 @@ cd karaoke_player
 
 ### 3. Instale as dependências
 
-```bash
+```bash id="install2"
 npm install
 ```
 
@@ -76,7 +82,7 @@ npm install
 
 ### 4. Execute o servidor
 
-```bash
+```bash id="run2"
 node server.js
 ```
 
@@ -84,9 +90,28 @@ node server.js
 
 ### 5. Acesse no navegador
 
-```bash
+```bash id="url2"
 http://localhost:3000
 ```
+
+---
+
+## 🔀 Base do Projeto
+
+Este projeto foi inicialmente baseado em um fork de:
+
+🔗 https://github.com/fraigo/karaoke-player
+
+A partir dessa base, foram realizadas diversas modificações e melhorias, incluindo:
+
+* Implementação de backend com Node.js e Python
+* Suporte a upload de arquivos `.KAR` e `.MIDI`
+* Sistema de upload múltiplo com validação de duplicidade
+* Tratamento automático de nomes de arquivos
+* Classificação de músicas (Nacional / Internacional)
+* Sistema de fila dinâmica com inserção durante execução
+* Reestruturação da interface e adaptação para uso em TV
+* Expansão das funcionalidades de reprodução
 
 ---
 
@@ -94,15 +119,15 @@ http://localhost:3000
 
 * Integração com banco de dados
 * Sistema de autenticação de usuários
-* Upload com validação avançada de arquivos (no momento apenas verifica duplicatas e extenções)
-* Interface aprimorada para gerenciamento de playlists
+* Upload com validações adicionais
+* Interface mais avançada para playlists
 * Deploy com armazenamento persistente
 
 ---
 
 ## 💡 Observações
 
-Este projeto demonstra a construção de uma aplicação web interativa com foco em processamento de mídia, integração entre diferentes tecnologias e experiência do usuário.
+Este projeto demonstra a evolução de uma base existente para uma aplicação completa, com foco em uso real, incluindo execução contínua de playlists, inserção dinâmica de músicas e compatibilidade com dispositivos de exibição como TVs.
 
 ---
 
