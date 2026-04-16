@@ -94,7 +94,7 @@ http://localhost:3000
 
 * Integração com banco de dados
 * Sistema de autenticação de usuários
-* Upload com validação avançada de arquivos
+* Upload com validação avançada de arquivos (no momento apenas verifica duplicatas e extenções)
 * Interface aprimorada para gerenciamento de playlists
 * Deploy com armazenamento persistente
 
