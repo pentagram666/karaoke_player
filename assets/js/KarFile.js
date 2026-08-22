@@ -11,18 +11,25 @@ KarFile.prototype.readFileInput=function(file,onload){
 	this.readBlob(file.files[0],onload);
 }
 
-KarFile.prototype.readUrl=function(url,onload) {
+KarFile.prototype.readUrl=function(url,onload,onerror) {
 	var oReq = new XMLHttpRequest();
 	var karfile=this;
-	var link=document.createElement("A");
-	link.href=url;
-	console.log(link.path);
 	karfile.fileName=url;
 	oReq.open('GET', url, true);
 	oReq.responseType = 'arraybuffer';
 	oReq.onload = function(oEvent) {
-		karfile.readBuffer(oReq.response);
+		try {
+			karfile.readBuffer(oReq.response);
+		} catch (e) {
+			console.log('Failed to parse MIDI file: ' + url, e);
+			if (onerror) onerror(e);
+			return;
+		}
 		onload(karfile,oReq.response);
+	};
+	oReq.onerror = function() {
+		console.log('Failed to fetch MIDI file: ' + url);
+		if (onerror) onerror(new Error('network error'));
 	};
 	oReq.send(null);
 }
@@ -162,7 +169,7 @@ KarFile.prototype.getLyrics=function(){
 			}
 			line+=text;
 			parts.push({time:time,text:text});
-			if (line.charAt(line.lenght-1)=="\n" && parts.length>0){
+			if (line.charAt(line.length-1)=="\n" && parts.length>0){
 				time=parts[0].time;
 				this.addLyrics(time,line,trk,parts);
 				startTime=0;

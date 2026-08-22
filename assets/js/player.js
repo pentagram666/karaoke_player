@@ -218,6 +218,11 @@ function playUrl(path, name) {
                 if (typeof player !== 'undefined' && player) {
                         player.openFile(buffer);
                 }
+        }, function(err) {
+                console.log('Nao foi possivel carregar a musica: ' + name, err);
+                if (typeof flashQueueConfirm === 'function') {
+                        flashQueueConfirm('✘ Arquivo de musica invalido');
+                }
         });
 }
 

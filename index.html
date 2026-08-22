@@ -685,7 +685,14 @@
                         for (var i = 0; i < selectedFiles.length; i++) {
                                 var item = document.createElement('div');
                                 item.className = 'upload-file-item';
-                                item.innerHTML = '<span class="upload-file-icon">&#9835;</span><span class="upload-file-name">' + selectedFiles[i].name + '</span>';
+                                var icon = document.createElement('span');
+                                icon.className = 'upload-file-icon';
+                                icon.innerHTML = '&#9835;';
+                                var nameSpan = document.createElement('span');
+                                nameSpan.className = 'upload-file-name';
+                                nameSpan.textContent = selectedFiles[i].name;
+                                item.appendChild(icon);
+                                item.appendChild(nameSpan);
                                 list.appendChild(item);
                         }
                 }
@@ -709,10 +716,10 @@
                                         if (data.success) {
                                                 var lines = [];
                                                 if (data.saved.length > 0) lines.push('\u2714 ' + data.saved.length + ' m\u00fasica(s) adicionada(s) ao cat\u00e1logo.');
-                                                if (data.dup_name && data.dup_name.length > 0) lines.push('\u26a0 Mesmo nome j\u00e1 existe: ' + data.dup_name.join(', '));
+                                                if (data.dup_name && data.dup_name.length > 0) lines.push('\u26a0 Mesmo nome j\u00e1 existe: ' + data.dup_name.map(escHtml).join(', '));
                                                 if (data.dup_content && data.dup_content.length > 0) {
                                                         lines.push('\u26a0 Conte\u00fado duplicado: ' + data.dup_content.map(function(d) {
-                                                                return '"' + d.file + '" (igual a "' + d.matches + '")';
+                                                                return '"' + escHtml(d.file) + '" (igual a "' + escHtml(d.matches) + '")';
                                                         }).join('; '));
                                                 }
                                                 if (!data.saved.length && !(data.dup_name && data.dup_name.length) && !(data.dup_content && data.dup_content.length)) {

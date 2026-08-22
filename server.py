@@ -155,9 +155,15 @@ def route_sync_backgrounds():
     return jsonify({'success': True, 'count': len(files), 'files': files})
 
 
+STATIC_DIR_PREFIXES = ('assets/', 'themes/', 'musicas/')
+STATIC_ROOT_FILES = {'config.js'}
+
+
 @app.route('/<path:path>')
 def static_files(path):
-    return send_from_directory('.', path)
+    if path in STATIC_ROOT_FILES or path.startswith(STATIC_DIR_PREFIXES):
+        return send_from_directory('.', path)
+    return jsonify({'error': 'Not found'}), 404
 
 
 if __name__ == '__main__':

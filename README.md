@@ -4,13 +4,6 @@ Aplicação web de karaokê com suporte a reprodução e gerenciamento de músic
 
 ---
 
-## 🚀 Demonstração
-
-🔗 Acesse a aplicação:
-https://karaokeplayer--metalnation666.replit.app/#sunset
-
----
-
 ## 🎯 Objetivo
 
 Desenvolver uma aplicação web interativa para reprodução de karaokê, com suporte a catálogo personalizado de músicas e controle de execução em tempo real, inclusive em ambientes como TVs Smart com acesso web.
@@ -19,8 +12,7 @@ Desenvolver uma aplicação web interativa para reprodução de karaokê, com su
 
 ## 🧩 Tecnologias Utilizadas
 
-* Node.js
-* Python
+* Python (Flask)
 * HTML
 * CSS
 * JavaScript
@@ -49,7 +41,7 @@ Desenvolver uma aplicação web interativa para reprodução de karaokê, com su
 A aplicação utiliza uma estrutura híbrida:
 
 * **Frontend:** Interface web para interação do usuário e controle da reprodução
-* **Backend:** Processamento de arquivos e lógica de execução utilizando Node.js e Python
+* **Backend:** Processamento de arquivos e lógica de execução utilizando Python (Flask)
 * **Integração:** Comunicação entre frontend e backend para gerenciamento de músicas e reprodução
 
 ---
@@ -75,7 +67,7 @@ cd karaoke_player
 ### 3. Instale as dependências
 
 ```bash id="install2"
-npm install
+pip install -r requirements.txt
 ```
 
 ---
@@ -83,7 +75,7 @@ npm install
 ### 4. Execute o servidor
 
 ```bash id="run2"
-node server.js
+python3 server.py
 ```
 
 ---
@@ -91,7 +83,7 @@ node server.js
 ### 5. Acesse no navegador
 
 ```bash id="url2"
-http://localhost:3000
+http://localhost:5000
 ```
 
 ---
@@ -104,7 +96,7 @@ Este projeto foi inicialmente baseado em um fork de:
 
 A partir dessa base, foram realizadas diversas modificações e melhorias, incluindo:
 
-* Implementação de backend com Node.js e Python
+* Implementação de backend com Python (Flask)
 * Suporte a upload de arquivos `.KAR` e `.MIDI`
 * Sistema de upload múltiplo com validação de duplicidade
 * Tratamento automático de nomes de arquivos
