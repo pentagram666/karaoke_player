@@ -286,6 +286,17 @@ Achados da revisão de código, já corrigidos:
   silenciosamente** (sem tela de erro, sem log visível pro usuário). Ver
   [Player de áudio/MIDI](#player-de-áudiomidi).
 
+**Limpeza de nomes do catálogo** (2026-08-22): 576 arquivos sem separador
+"Artista - Musica" claro foram checados contra a iTunes Search API
+(`country=BR` pra `musicas/`, `US` pra `assets/music/`); 197 renomeados com
+confiança ≥0.72, 313 mantidos como estavam por falta de match confiável, 66
+apontaram pra um nome já existente no catálogo (duplicata provável, não
+apagados). `playlist.json` das duas categorias foi regenerado depois. Lista
+completa em [`docs/naming-cleanup-report.md`](naming-cleanup-report.md). Os
+~9200 arquivos que já pareciam bem formatados não foram reverificados —
+confirmar a ordem Artista/Musica de todo o catálogo exigiria ~9000 chamadas
+de API a ~20/min (várias horas).
+
 Pontos remanescentes, de baixo risco/baixa prioridade:
 
 - **`assets/css/range.css`** não está referenciado em `index.html` (só os
